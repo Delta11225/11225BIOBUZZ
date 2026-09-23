@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.MsPacman.StateMachines.LauncherSM_WITHPDIF
 import org.firstinspires.ftc.teamcode.MsPacman.StateMachines.RampSM;
 import org.firstinspires.ftc.teamcode.TeleOp.GoBildaPinpointDriver;
 
-@TeleOp
+@TeleOp(name="MsPacman TeleOp")
 public class MsPacmanTeleOpNew extends OpMode {
     private Limelight3A limelight;
 

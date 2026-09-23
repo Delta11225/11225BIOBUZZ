@@ -10,25 +10,27 @@ public class TeleOpMain extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     // Instantiate your state machines here
+        // Instantiate = creating an instance (object) from a class.
+        // MechDriveSM is the class/blueprint.
+        // new MechDriveSM() creates an instance of that class.
+        // drive is the object refers to that newly created instance.
+        // Notice we will use drive. to access things from MechDriveSM
     private MechDriveSM drive = new MechDriveSM();
-    // private LiftStateMachine lift = new LiftStateMachine(); // Example for future state machines
-    // private IntakeStateMachine intake = new IntakeStateMachine();
+    //add other State Machines here as you create them
 
     @Override
     public void init() {
         // Initialize the drive system
         drive.init(hardwareMap, telemetry);
-
         // Initialize other subsystems here
-        // lift.init(hardwareMap);
-        // intake.init(hardwareMap);
 
-        telemetry.addData("Status", "Central TeleOp Initialized");
+        telemetry.addData("Status", "TeleOp Initialized");
         telemetry.update();
     }
 
     @Override
     public void init_loop() {
+        //put things here that you need constantly updating in init (like a camera stream)
     }
 
     @Override
@@ -42,9 +44,8 @@ public class TeleOpMain extends OpMode {
         // Run the drive state machine
         drive.update(gamepad1, telemetry);
 
-        // Drop your future subsystem state machine updates right below
-        // lift.update(gamepad1, telemetry);
-        // intake.update(gamepad1, telemetry);
+        // Put subsystem state machine updates here
+
 
         // Central global telemetry data
         telemetry.addData("Runtime", runtime.toString());
