@@ -34,6 +34,7 @@ public class FirstSubsystemAutoTest extends LinearOpMode {
 
                 .addPath(new BezierLine(startPose, endPose))
                 .setConstantHeadingInterpolation(startPose.getHeading())//uses whatever heading is specified in the endPose pose
+                .addParametricCallback(0.2, intake.intakeSeconds(1.5))
                 .build();
 
     }
@@ -49,7 +50,7 @@ public class FirstSubsystemAutoTest extends LinearOpMode {
 
         waitForStart();//Bridge between INIT and RUN
 
-        follower.followPath(chain1, 0.2, true); ///max power is 80in/sec, set a max from 0-1 -> holdEnd is only used for the LAST PATH IN A SEQUENCE
+        follower.followPath(chain1, 0.4, true); ///max power is 80in/sec, set a max from 0-1 -> holdEnd is only used for the LAST PATH IN A SEQUENCE
         while (opModeIsActive() && follower.isBusy()){
             follower.update();
             Scheduler.execute();
