@@ -71,11 +71,12 @@ public class Intake {
     }
 
     //this is the method we will use in autonomous to trigger the intake for INTAKING!
-    public void intakeSeconds(double targetDuration){
+    public Runnable intakeSeconds(double targetDuration){
         if(intakeState == IntakeState.IDLE){
             intakeDuration = targetDuration;
             areWeIntaking = true;
         }
+        return null;
     }
     //this is the method we will use in autonomous to trigger the intake for OUTTAKING!
     //we need to think about if we need to make "targetDuration" a unique variable. I think it's ok, but i could be wrong
