@@ -34,6 +34,7 @@ public class Intake {
     public void init(HardwareMap hardwareMap){
         intake = hardwareMap.get(DcMotor.class, "intake");
         intake.setDirection(DcMotor.Direction.REVERSE);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //redundant, but setting intake to idle again just to make sure.
         intakeState = IntakeState.IDLE;
         intake.setPower(0);
@@ -71,12 +72,13 @@ public class Intake {
     }
 
     //this is the method we will use in autonomous to trigger the intake for INTAKING!
-    public Runnable intakeSeconds(double targetDuration){
-        if(intakeState == IntakeState.IDLE){
-            intakeDuration = targetDuration;
-            areWeIntaking = true;
-        }
-        return null;
+    public Runnable intakeSeconds(double targetDuration) {
+        return () -> {
+            if (intakeState == IntakeState.IDLE) {
+                intakeDuration = targetDuration;
+                areWeIntaking = true;
+            }
+        };
     }
     //this is the method we will use in autonomous to trigger the intake for OUTTAKING!
     //we need to think about if we need to make "targetDuration" a unique variable. I think it's ok, but i could be wrong

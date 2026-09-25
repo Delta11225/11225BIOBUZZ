@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp
 public class ExampleTeleOpSM extends OpMode {
 
-    private ExampleSM motor = new ExampleSM();
+    private final ExampleSM motor = new ExampleSM();
 
     @Override
     public void init() {
