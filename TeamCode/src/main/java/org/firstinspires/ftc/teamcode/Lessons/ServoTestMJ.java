@@ -13,11 +13,17 @@ public class ServoTestMJ extends OpMode {
     }
     @Override
     public void loop() {
-        double servoPosition = gamepad1.right_stick_x;
-
-        servo1.setPosition(servoPosition);
-
-        telemetry.addData("position",servoPosition);
-        telemetry.addData("servo 1",servo1.getPosition());
+        if (gamepad1.x){
+            servo1.setPosition(0);
+            telemetry.addLine("0 degrees");
+        }
+        else if(gamepad1.y) {
+            servo1.setPosition(0.5);
+            telemetry.addLine("90 degrees");
+        }
+        else if(gamepad1.b){
+            servo1.setPosition(1);
+            telemetry.addLine("180 degrees");
+}
     }
 }
