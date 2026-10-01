@@ -38,6 +38,7 @@ public class Intake {
         //redundant, but setting intake to idle again just to make sure.
         intakeState = IntakeState.IDLE;
         intake.setPower(0);
+        
     }
 
 
@@ -66,12 +67,15 @@ public class Intake {
                 break;
 
             case OUTTAKING:
-                //try writing the correct code for outtaking based on the above code
+                intake.setPower(-1);
+                if(intakeTime.seconds() >= intakeDuration){
+                    intake.setPower(0);
+                    areWeOutaking = false;
+                    intakeState = IntakeState.IDLE;
+                }
                 break;
         }
     }
-
-    //this is the method we will use in autonomous to trigger the intake for INTAKING!
     public Runnable intakeSeconds(double targetDuration) {
         return () -> {
             if (intakeState == IntakeState.IDLE) {
@@ -80,10 +84,13 @@ public class Intake {
             }
         };
     }
-    //this is the method we will use in autonomous to trigger the intake for OUTTAKING!
-    //we need to think about if we need to make "targetDuration" a unique variable. I think it's ok, but i could be wrong
-    public void outakeSeconds (double targetDuration){
-        //write code for outtaking method
+    public Runnable outakeSeconds (double targetDuration){
+        return () -> {
+            if(intakeState == IntakeState.IDLE){
+                intakeDuration = targetDuration;
+                areWeOutaking = true;
+            }
+        };
     }
 }
 
