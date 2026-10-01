@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TestAutos;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Scheduler;
@@ -11,68 +10,68 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.pedroPathing.Subsystems.Intake;
+import org.firstinspires.ftc.teamcode.pedroPathing.Subsystems.Launcher;
 
 @Autonomous
 public class FirstSubsystemAutoTest extends LinearOpMode {
 
     public Follower follower;
     public Intake intake;
+    public Launcher launcher;
 
 
     //////ALL POSES FOR ALL PATHS//////
-    private final Pose startPose = new Pose(72, 24, Math.toRadians(90));
-    private final Pose midPose = new Pose(72, 72, Math.toRadians(270));
-    private final Pose endPose1 = new Pose(72, 128, Math.toRadians(90));
-    private final Pose endPose2 = new Pose(72, 24, Math.toRadians(270));
+    private final Pose startPose1 = new Pose(48, 12, Math.toRadians(90));
+    private final Pose endPose1 = new Pose(48, 96, Math.toRadians(90));
+    private final Pose startPose2 = new Pose(96, 96, Math.toRadians(270));
+    private final Pose endPose2 = new Pose(96, 36, Math.toRadians(270));
 
 
 
     //////ALL PATHS///////
     public PathChain chain1;
 
-    public PathChain chain2;
 
     // Define chains of paths that are all grouped together under chains
     // Hierarchy: chain -> path -> Bézier curve -> pose
     public void buildPaths() {
         chain1 = follower.pathBuilder()
-                .setGlobalDeceleration() //sets deceleration/braking globally so that the entire chain is treated as one continuous path, makes transitions smooth!
+                //.setGlobalDeceleration() //sets deceleration/braking globally so that the entire chain is treated as one continuous path, makes transitions smooth!
+                .addPath(new BezierLine(startPose1, endPose1))
+                .setConstantHeadingInterpolation(startPose1.getHeading())
+                .addParametricCallback(0.4, intake.intakeSeconds(1))
 
-                .addPath(new BezierLine(startPose, endPose1))
-                .setConstantHeadingInterpolation(startPose.getHeading())//uses whatever heading is specified in the endPose pose
-                .addParametricCallback(0.2, intake.outakeSeconds(0.5))
+                .addPath(new BezierLine(endPose1, startPose2))
+                .setLinearHeadingInterpolation(endPose1.getHeading(), startPose2.getHeading())
 
-                .build();
+                .addPath(new BezierLine(startPose2, endPose2))
+                .setConstantHeadingInterpolation(startPose2.getHeading())
+                .addParametricCallback(0.4, intake.outakeSeconds(0.7))
 
-        chain2 = follower.pathBuilder()
-                .setGlobalDeceleration()
-
-                .addPath(new BezierLine(endPose1, midPose))
-                .setLinearHeadingInterpolation(endPose1.getHeading(), midPose.getHeading())
-
-                .addPath(new BezierLine(midPose, endPose2))
-                .setConstantHeadingInterpolation(endPose2.getHeading())
-                .addParametricCallback(0.4, intake.intakeSeconds(0.5))
                 .build();
     }
 
     ////////RUN METHOD////////
     @Override
     public void runOpMode(){
+
         follower = Constants.createFollower(hardwareMap);
         intake = new Intake();
         intake.init(hardwareMap);
+        launcher = new Launcher();
+        launcher.init(hardwareMap);
+
         Scheduler.reset();
         buildPaths();
-        follower.setStartingPose(startPose);
+        follower.setStartingPose(startPose1);
 
         waitForStart();//Bridge between INIT and RUN
 
-        follower.followPath(chain1, 0.4, true);
-        follower.followPath(chain2, 0.4, true);///max power is 80in/sec, set a max from 0-1 -> holdEnd is only used for the LAST PATH IN A SEQUENCE
+        follower.followPath(chain1, 0.4, true); ///max power is 80in/sec, set a max from 0-1 -> holdEnd is only used for the LAST PATH IN A SEQUENCE
         while (opModeIsActive() && follower.isBusy()){
             follower.update();
             intake.update();
+            launcher.update();
             Scheduler.execute();
         }
 
