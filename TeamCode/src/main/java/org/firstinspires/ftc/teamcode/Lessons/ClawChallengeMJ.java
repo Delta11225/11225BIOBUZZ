@@ -25,8 +25,8 @@ public class ClawChallengeMJ extends OpMode {
             servo2.setPosition(0.14);
         }
         else if (gamepad1.b) {
-            servo1.setPosition(0);
-            servo2.setPosition(1);
+            servo1.setPosition(0.5);
+            servo2.setPosition(0.3);
         }
     }
 }
