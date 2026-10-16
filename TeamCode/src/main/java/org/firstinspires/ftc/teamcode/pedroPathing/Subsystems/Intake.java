@@ -38,7 +38,8 @@ public class Intake {
         //redundant, but setting intake to idle again just to make sure.
         intakeState = IntakeState.IDLE;
         intake.setPower(0);
-        
+
+
     }
 
 
