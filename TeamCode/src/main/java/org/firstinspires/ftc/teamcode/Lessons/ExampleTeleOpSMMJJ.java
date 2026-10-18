@@ -27,5 +27,13 @@ public class ExampleTeleOpSMMJJ extends OpMode {
             motor.setState(EXAMPLE_SM_MJJ.MotorState.IDLE);
         }
         motor.update();
+
+        telemetry.addData("Current Motor State", motor.getState());
+        telemetry.update();
+    }
+
+    @Override
+    public void stop() {
+        motor.stop();
     }
 }

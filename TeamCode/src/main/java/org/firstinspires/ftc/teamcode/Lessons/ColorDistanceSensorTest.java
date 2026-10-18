@@ -32,19 +32,28 @@ public class ColorDistanceSensorTest extends OpMode {
         telemetry.addData("Distance(cm)", sensorDistance.getDistance(DistanceUnit.CM));
 
         if (sensorDistance.getDistance(DistanceUnit.CM) > 5) {
-            servo1.setPosition(0.5);
-        servo2.setPosition(0); }
+            servo1.setPosition(0.45);
+            servo2.setPosition(0.4); }
         else {
-
+/// for open,  left 0.85, right 0.4
             if (sensorColor.red() > 2000) {
-                servo1.setPosition(0);
-                servo2.setPosition(0);
+                servo1.setPosition(0.8);
+                servo2.setPosition(0.05);
+                telemetry.addLine("Closing...");
+            } else if (sensorColor.green() > 5000) {
+                servo1.setPosition(0.45);
+                servo2.setPosition(0.4);
+                telemetry.addLine("Opening...");
+
             } else if (sensorColor.blue() > 2000) {
-                servo1.setPosition(0);
-                servo2.setPosition(0);
+                servo1.setPosition(0.8);
+                servo2.setPosition(0.05);
+                telemetry.addLine("Closing...");
+
             } else {
-                servo1.setPosition(0.825);
-                servo2.setPosition(0.825);
+                servo1.setPosition(0.45);
+                servo2.setPosition(0.4);
+                telemetry.addLine("Opening...");
             }
         }
     }

@@ -1,0 +1,41 @@
+package org.firstinspires.ftc.teamcode.Lessons;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.TeleOp.ExampleSM;
+
+@TeleOp
+public class IntakeTeleOpSMJYMJJN extends OpMode {
+
+    private final IntakeSMJYMJJN intake = new IntakeSMJYMJJN();
+
+    @Override
+    public void init() {
+        intake.init(hardwareMap);
+    }
+
+    @Override
+    public void loop() {
+        if(gamepad1.a){
+            intake.setState(IntakeSMJYMJJN.MotorState.INTAKE);
+        }
+        else if (gamepad1.b){
+            intake.setState(IntakeSMJYMJJN.MotorState.OUTTAKE);
+        }
+        else {
+            intake.setState(IntakeSMJYMJJN.MotorState.IDLE);
+        }
+
+
+        intake.update();
+
+        telemetry.addData("Current Motor State", intake.getState());
+        telemetry.update();
+    }
+
+    @Override
+    public void stop() {
+        intake.stop();
+    }
+}
