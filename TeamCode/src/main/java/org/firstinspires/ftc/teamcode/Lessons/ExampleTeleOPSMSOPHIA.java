@@ -55,7 +55,7 @@ public class ExampleTeleOPSMSOPHIA extends OpMode {
         //0.8,0.05
         telemetry.addData("Current Motor State", motor.getState());
         telemetry.addData("Current Intake State", intake.getState());
-        telemetry.addData("Current Intake State", claw.getState());
+        telemetry.addData("Current Claw State", claw.getState());
         telemetry.update();
     }
     @Override
