@@ -43,11 +43,6 @@ public class BerthaTeleOp extends OpMode {
 
     double currentAngle;
 
-
-
-
-
-
     @Override
     public void init() {
 
