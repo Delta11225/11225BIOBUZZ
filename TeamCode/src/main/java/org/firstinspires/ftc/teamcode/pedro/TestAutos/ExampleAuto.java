@@ -17,12 +17,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Intake;
+import org.firstinspires.ftc.teamcode.pedro.Subsystems.Launcher;
 
 
 @Autonomous
 public class ExampleAuto extends OpMode {
     private Follower follower;
     private Intake intake;
+    private Launcher launcher;
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(72, 12, 90);
         private final Pose endLinepose = p.of(72, 72, 270);
@@ -50,8 +52,9 @@ public class ExampleAuto extends OpMode {
 
     private Command autoRoutine(){
         return sequential(
-            forward(),
-            curveAndIntake()
+            launcher.launchSeconds(7, 2700)
+            //forward(),
+            //curveAndIntake()
         );
     }
 
@@ -61,6 +64,7 @@ public class ExampleAuto extends OpMode {
 
         follower = Constants.create(hardwareMap);
         intake = new Intake(hardwareMap);
+        launcher = new Launcher(hardwareMap);
 
         follower.setPose(startPose);
         follower.update();
