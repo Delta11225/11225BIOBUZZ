@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.Lessons;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Subsystems.Intake;
-
 @TeleOp
 public class ExampleTeleOPSMSOPHIA extends OpMode {
     private final ExampleSMSOPHIA motor = new ExampleSMSOPHIA();

@@ -206,6 +206,7 @@ public class BerthaTeleOp extends OpMode {
         }
         intake.update();
     }/////end of peripheral move////////
+
     public void stop(){
         intake.stop();
     }
