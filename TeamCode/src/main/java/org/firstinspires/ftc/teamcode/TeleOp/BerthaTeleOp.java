@@ -11,6 +11,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Lessons.IntakeSMSOPHIA;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaIntakeSM;
+import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaLauncherSM;
+import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaWindmillSM;
 
 @TeleOp
 public class BerthaTeleOp extends OpMode {
@@ -20,6 +22,8 @@ public class BerthaTeleOp extends OpMode {
     public DcMotor frontLeft = null;
     public DcMotor frontRight = null;
     private final BerthaIntakeSM intake = new BerthaIntakeSM();
+    private final BerthaLauncherSM launcher = new BerthaLauncherSM();
+    private final BerthaWindmillSM windmill = new BerthaWindmillSM();
 
     GoBildaPinpointDriver odo; // Declare OpMode member for the Odometry Computer
 
@@ -195,20 +199,40 @@ public class BerthaTeleOp extends OpMode {
 
     }/////end of move////////
     public void peripheral() {
-        if(gamepad2.a){
+        if(gamepad2.right_bumper) {
             intake.setState(BerthaIntakeSM.MotorState.INTAKE);
         }
-        else if(gamepad2.b){
+        else if(gamepad2.left_bumper){
             intake.setState(BerthaIntakeSM.MotorState.OUTTAKE);
         }
         else{
             intake.setState(BerthaIntakeSM.MotorState.IDLE);
         }
         intake.update();
+        if(gamepad2.b){
+            launcher.setState(BerthaLauncherSM.launchMotorStates.LAUNCHING);
+        }
+        else if (gamepad2.x){
+            launcher.setState(BerthaLauncherSM.launchMotorStates.IDLE);
+        }
+        launcher.update();
+        if(gamepad2.dpad_up){
+            windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
+        }
+        else if (gamepad2.dpad_down){
+            windmill.setState(BerthaWindmillSM.windmillState.BACKWARDS);
+        }
+        else{
+            windmill.setState(BerthaWindmillSM.windmillState.IDLE);
+
+        }
+        windmill.update();
     }/////end of peripheral move////////
 
     public void stop(){
         intake.stop();
+        launcher.stop();
+        windmill.stop();
     }
 
 } //end of opmode
