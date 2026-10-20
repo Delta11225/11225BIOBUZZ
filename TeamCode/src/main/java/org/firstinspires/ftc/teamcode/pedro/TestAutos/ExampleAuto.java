@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedro.TestAutos;
 
 import static com.pedropathing.api.Paths.*;
 import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.groups.Groups.parallel;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 
@@ -15,11 +16,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
+import org.firstinspires.ftc.teamcode.pedro.Subsystems.Intake;
 
 
 @Autonomous
 public class ExampleAuto extends OpMode {
     private Follower follower;
+    private Intake intake;
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(72, 12, 90);
         private final Pose endLinepose = p.of(72, 72, 270);
@@ -33,11 +36,22 @@ public class ExampleAuto extends OpMode {
         return curve(endLinepose, CP1, endCurvePose).tangent();
     }
 
+    private Command forward(){
+        return sequential(
+            follow(follower, goStraight())
+        );
+    }
+    private Command curveAndIntake(){
+        return parallel(
+            follow(follower, curveBack()),
+            intake.intakeSeconds(4)
+        );
+    }
+
     private Command autoRoutine(){
         return sequential(
-                follow(follower, goStraight()),
-                //can add actions and subsystems here
-                follow(follower, curveBack())
+            forward(),
+            curveAndIntake()
         );
     }
 
@@ -46,13 +60,17 @@ public class ExampleAuto extends OpMode {
         Scheduler.reset();
 
         follower = Constants.create(hardwareMap);
+        intake = new Intake(hardwareMap);
+
         follower.setPose(startPose);
         follower.update();
     }
 
     @Override
     public void start(){
-        schedule(autoRoutine());
+        schedule(
+            autoRoutine()
+        );
     }
 
     @Override
