@@ -15,8 +15,8 @@ public class IntakeSMJYMJJN {
 
     //declaring all hardware members
     private DcMotor intake;
-    private CRServo intakeSideLeft;
-    private CRServo intakeSideRight;
+    private CRServo intakeSL;
+    private CRServo intakeSR;
 
 
 
@@ -32,8 +32,8 @@ public class IntakeSMJYMJJN {
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE );
 
-        intakeSideLeft = hardwareMap.get(CRServo.class, "intakeSL");
-        intakeSideRight = hardwareMap.get(CRServo.class, "intakeSR");
+        intakeSL = hardwareMap.get(CRServo.class, "l_intake_wheel");
+        intakeSR = hardwareMap.get(CRServo.class, "r_intake_wheel");
     }
     public IntakeSMJYMJJN.MotorState getState(){
         return currentState;
@@ -45,8 +45,8 @@ public class IntakeSMJYMJJN {
 
     public void stop(){
         intake.setPower(0);
-        intakeSideLeft.setPower(0);
-        intakeSideRight.setPower(0);
+        intakeSL.setPower(0);
+        intakeSR.setPower(0);
 
         currentState = IntakeSMJYMJJN.MotorState.IDLE;
     }
@@ -55,18 +55,18 @@ public class IntakeSMJYMJJN {
         switch (currentState){
             case INTAKE:
                 intake.setPower(ForwardPower);
-                intakeSideLeft.setPower(ForwardPower);
-                intakeSideRight.setPower(ForwardPower);
+                intakeSL.setPower(BackwardPower);
+                intakeSR.setPower(ForwardPower);
                 break;
             case OUTTAKE:
                 intake.setPower(BackwardPower);
-                intakeSideLeft.setPower(BackwardPower);
-                intakeSideRight.setPower(BackwardPower);
+                intakeSL.setPower(ForwardPower);
+                intakeSR.setPower(BackwardPower);
                 break;
             case IDLE:
                 intake.setPower(0);
-                intakeSideLeft.setPower(0);
-                intakeSideRight.setPower(0);
+                intakeSL.setPower(0);
+                intakeSR.setPower(0);
                 break;
         }
     }

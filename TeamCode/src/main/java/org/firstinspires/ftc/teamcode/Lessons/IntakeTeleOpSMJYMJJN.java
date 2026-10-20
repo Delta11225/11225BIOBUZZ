@@ -17,10 +17,10 @@ public class IntakeTeleOpSMJYMJJN extends OpMode {
 
     @Override
     public void loop() {
-        if(gamepad1.a){
+        if(gamepad2.right_bumper){
             intake.setState(IntakeSMJYMJJN.MotorState.INTAKE);
         }
-        else if (gamepad1.b){
+        else if (gamepad2.left_bumper){
             intake.setState(IntakeSMJYMJJN.MotorState.OUTTAKE);
         }
         else {
@@ -30,7 +30,7 @@ public class IntakeTeleOpSMJYMJJN extends OpMode {
 
         intake.update();
 
-        telemetry.addData("Current Motor State", intake.getState());
+        telemetry.addData("Current Intake Motor State", intake.getState());
         telemetry.update();
     }
 
