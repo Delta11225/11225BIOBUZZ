@@ -32,10 +32,16 @@ public class ExampleAuto extends OpMode {
         private final Pose endCurvePose = p.of(24, 24, 90);
 
     private Path goStraight(){
-        return line(startPose, endLinepose).linear(startPose, endLinepose);
+        return line(startPose, endLinepose).linear(startPose, endLinepose)
+                .with(
+                    Constants.foresightConfig.maxPathSpeed.at(1.0)
+                );
     }
     private Path curveBack(){
-        return curve(endLinepose, CP1, endCurvePose).tangent();
+        return curve(endLinepose, CP1, endCurvePose).tangent()
+                .with(
+                    Constants.foresightConfig.maxPathSpeed.at(1.0)
+                );
     }
 
     private Command forward(){
@@ -52,9 +58,9 @@ public class ExampleAuto extends OpMode {
 
     private Command autoRoutine(){
         return sequential(
-            launcher.launchSeconds(7, 2700)
-            //forward(),
-            //curveAndIntake()
+            launcher.launchSeconds(7, 2700),
+            forward(),
+            curveAndIntake()
         );
     }
 

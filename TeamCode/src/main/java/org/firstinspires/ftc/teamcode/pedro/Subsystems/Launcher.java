@@ -9,9 +9,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Launcher {
-    private DcMotorEx flywheel;
-    private CRServo windmill;
-    private DcMotor intake;
+    private final DcMotorEx flywheel;
+    private final CRServo windmill;
+    private final DcMotor intake;
     public ElapsedTime launchTime = new ElapsedTime();
     public final double TICKS_PER_MOTOR_REV = 28;
 
