@@ -38,7 +38,7 @@ public class Launcher {
                 .setExecute(() -> {
                     flywheel.setVelocity((launchRPM/60)*TICKS_PER_MOTOR_REV);
                     intake.setPower(1);
-                    windmill.setPower(1);
+                    windmill.setPower(0.8);
 
                 })
                 .setDone(() -> {

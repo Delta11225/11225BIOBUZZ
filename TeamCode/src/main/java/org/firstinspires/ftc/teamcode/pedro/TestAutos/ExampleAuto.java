@@ -58,7 +58,7 @@ public class ExampleAuto extends OpMode {
 
     private Command autoRoutine(){
         return sequential(
-            launcher.launchSeconds(7, 2700),
+            launcher.launchSeconds(3, 2520),
             forward(),
             curveAndIntake()
         );
