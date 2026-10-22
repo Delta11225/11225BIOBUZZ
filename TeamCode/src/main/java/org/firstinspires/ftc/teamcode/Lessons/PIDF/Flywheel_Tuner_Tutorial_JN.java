@@ -23,7 +23,7 @@ public class Flywheel_Tuner_Tutorial_JN extends OpMode {
     public void init() {
         flywheelMotor = hardwareMap.get(DcMotorEx.class, "motor1");
         flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        flywheelMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheelMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
         flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
