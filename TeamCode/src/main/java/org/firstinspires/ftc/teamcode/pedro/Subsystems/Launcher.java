@@ -16,7 +16,7 @@ public class Launcher {
     public final double TICKS_PER_MOTOR_REV = 28;
 
     public Launcher(HardwareMap hardwareMap){
-        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+        flywheel = hardwareMap.get(DcMotorEx.class, "launcher");
         flywheel.setDirection(DcMotor.Direction.FORWARD);
         flywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         flywheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -30,7 +30,6 @@ public class Launcher {
 
     public Command launchSeconds(double launchDuration, double launchRPM){
         return new CommandBuilder()
-
                 .requiring(flywheel, intake, windmill)
                 .setStart(() -> {
                     launchTime.reset();
@@ -38,7 +37,7 @@ public class Launcher {
                 .setExecute(() -> {
                     flywheel.setVelocity((launchRPM/60)*TICKS_PER_MOTOR_REV);
                     intake.setPower(1);
-                    windmill.setPower(0.8);
+                    windmill.setPower(0.75);
 
                 })
                 .setDone(() -> {
