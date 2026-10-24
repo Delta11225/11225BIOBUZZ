@@ -10,8 +10,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Lessons.IntakeSMSOPHIA;
-import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaIntakeSM;
-import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaLauncherSM;
+import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaIntakeSMV2;
+import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaLauncherSMPIDF;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaWindmillSM;
 
 @TeleOp
@@ -21,9 +21,10 @@ public class BerthaTeleOp extends OpMode {
     public DcMotor rearRight = null;
     public DcMotor frontLeft = null;
     public DcMotor frontRight = null;
-    private final BerthaIntakeSM intake = new BerthaIntakeSM();
-    private final BerthaLauncherSM launcher = new BerthaLauncherSM();
+
+    private final BerthaIntakeSMV2 intake = new BerthaIntakeSMV2();
     private final BerthaWindmillSM windmill = new BerthaWindmillSM();
+    private final BerthaLauncherSMPIDF launcher = new BerthaLauncherSMPIDF();
 
     GoBildaPinpointDriver odo; // Declare OpMode member for the Odometry Computer
 
@@ -46,6 +47,8 @@ public class BerthaTeleOp extends OpMode {
     double side;
 
     double currentAngle;
+
+    double baselauncherRPM = 0;
 
     @Override
     public void init() {
@@ -125,7 +128,8 @@ public class BerthaTeleOp extends OpMode {
         rearRight.setPower(0);
 
         intake.init(hardwareMap);
-
+        windmill.init(hardwareMap);
+        launcher.init(hardwareMap);
 
     }
     @Override
@@ -199,23 +203,28 @@ public class BerthaTeleOp extends OpMode {
 
     }/////end of move////////
     public void peripheral() {
+        boolean launcherRPM = gamepad2.x;
+        boolean launcherOff = gamepad2.a;
+
         if(gamepad2.right_bumper) {
-            intake.setState(BerthaIntakeSM.MotorState.INTAKE);
+            intake.setState(BerthaIntakeSMV2.MotorState.INTAKE);
         }
         else if(gamepad2.left_bumper){
-            intake.setState(BerthaIntakeSM.MotorState.OUTTAKE);
+            intake.setState(BerthaIntakeSMV2.MotorState.OUTTAKE);
         }
         else{
-            intake.setState(BerthaIntakeSM.MotorState.IDLE);
+            intake.setState(BerthaIntakeSMV2.MotorState.IDLE);
         }
-        intake.update();
-        if(gamepad2.b){
-            launcher.setState(BerthaLauncherSM.launchMotorStates.LAUNCHING);
+
+        if(launcherRPM){
+            baselauncherRPM = 2600;
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.REVVING_UP);
+
         }
-        else if (gamepad2.x){
-            launcher.setState(BerthaLauncherSM.launchMotorStates.IDLE);
+        else if (launcherOff) {
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
         }
-        launcher.update();
+
         if(gamepad2.dpad_up){
             windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
         }
@@ -226,7 +235,10 @@ public class BerthaTeleOp extends OpMode {
             windmill.setState(BerthaWindmillSM.windmillState.IDLE);
 
         }
+
+        intake.update();
         windmill.update();
+        launcher.update(2600);
     }/////end of peripheral move////////
 
     public void stop(){

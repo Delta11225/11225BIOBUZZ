@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 @TeleOp
@@ -11,12 +12,18 @@ public class FlyWheelTESTBREADON extends OpMode {
         public DcMotorEx FlyWheel;
         double firstLaunchRPM = 1400;
         double flyWheelRPM=1400;
+        double pChange = 5;
+        double fChange = 0;
 
         boolean lastDpadRightPressed = false;
         boolean lastDpadLeftPressed = false;
+        boolean lastDpadUpPressed = false;
+        boolean lastDpadDownPressed = false;
+        boolean lastLeftBumperPressed = false;
+        boolean lastRightBumperPressed = false;
 
-        public double F = 13;
-        public double P = 10;
+        public double F = 1.7;
+        public double P = 30;
 
         @Override
         public void init() {
@@ -24,7 +31,7 @@ public class FlyWheelTESTBREADON extends OpMode {
 
             FlyWheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-            FlyWheel.setDirection(DcMotorEx.Direction.FORWARD);
+            FlyWheel.setDirection(DcMotorEx.Direction.REVERSE);
 
             PIDFCoefficients PIDF = new PIDFCoefficients(
                     P, //P - Corrects based on how far the actual velocity is from the target velocity
@@ -38,15 +45,10 @@ public class FlyWheelTESTBREADON extends OpMode {
 
 
         }
-    @Override
-         public void init_loop() {
-            FlyWheel.setVelocity(flyWheelRPM);
-
-    }
 
         @Override
         public void loop() {
-/*
+
 
             //flywheel PIDF code
             PIDFCoefficients PIDF = new PIDFCoefficients(
@@ -58,42 +60,6 @@ public class FlyWheelTESTBREADON extends OpMode {
 
             FlyWheel.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, PIDF);
 
-
-            ////launcher flywheels
-            if (gamepad1.dpad_right&& !lastDpadRightPressed){
-                firstLaunchRPM+=100;
-            }
-
-            if (gamepad1.dpad_left && !lastDpadLeftPressed){
-                firstLaunchRPM-=100;
-            }
-
-            lastDpadRightPressed=gamepad1.dpad_right;
-            lastDpadLeftPressed = gamepad1.dpad_left;
-
-
-            if (gamepad2.y) {
-                flyWheelRPM= firstLaunchRPM;
-                telemetry.addData("motor RPM", firstLaunchRPM);
-
-            } else if (gamepad1.b) {
-                flyWheelRPM= 0;
-                telemetry.addLine("none");
-            }
-
-
-            double TICKS_PER_MOTOR_REV = 28;
-            double FLYWHEEL_TARGET_RPM = flyWheelRPM;
-            double FLYWHEEL_TARGET_TPS = (FLYWHEEL_TARGET_RPM/60.0)*TICKS_PER_MOTOR_REV;
-
-            FlyWheel.setVelocity(FLYWHEEL_TARGET_TPS);
-
-            // telemetry.addData("leftFlyWheel TPS", leftFlyWheel.getVelocity());
-            // telemetry.addData("Target TPS", FLYWHEEL_TARGET_TPS);
-            telemetry.addData("leftFlyWheel RPM", (FlyWheel.getVelocity()*60/TICKS_PER_MOTOR_REV));
-            telemetry.addData("current RPM", flyWheelRPM);
-*/
-
                 // Adjust target RPM with D-pad
                 if (gamepad1.dpad_right && !lastDpadRightPressed) {
                     firstLaunchRPM += 10;
@@ -103,12 +69,30 @@ public class FlyWheelTESTBREADON extends OpMode {
                     firstLaunchRPM -= 10;
                 }
 
+                if(gamepad1.dpad_up && !lastDpadUpPressed){
+                    pChange +=0.1;
+                }
+                if(gamepad1.dpad_down && !lastDpadDownPressed){
+                    pChange -=0.1;
+                }
+                if(gamepad1.left_bumper&&!lastLeftBumperPressed){
+                    fChange -= 0.1;
+                }
+                if(gamepad1.right_bumper&&!lastRightBumperPressed){
+                    fChange +=0.1;
+                }
                 lastDpadRightPressed = gamepad1.dpad_right;
                 lastDpadLeftPressed = gamepad1.dpad_left;
+                lastDpadUpPressed = gamepad1.dpad_up;
+                lastDpadDownPressed = gamepad1.dpad_down;
+                lastLeftBumperPressed=gamepad1.left_bumper;
+                lastRightBumperPressed=gamepad1.right_bumper;
 
                 // Set target RPM
                 if (gamepad1.y) {
                     flyWheelRPM = firstLaunchRPM;
+                    P=pChange;
+                    F=fChange;
                 } else if (gamepad1.b) {
                     flyWheelRPM = 0;
                 }
@@ -128,6 +112,12 @@ public class FlyWheelTESTBREADON extends OpMode {
                 telemetry.addData("Target RPM Setting", firstLaunchRPM);
                 telemetry.addData("Commanded RPM", flyWheelRPM);
                 telemetry.addData("Actual RPM", "%.0f", actualRPM);
+                telemetry.addData("pChange",pChange);
+                telemetry.addData("P actual", P);
+                telemetry.addData("fChange",fChange);
+                telemetry.addData("F actual", F);
+                telemetry.addData("Current RPM", (FlyWheel.getVelocity()*60/TICKS_PER_MOTOR_REV));
+
                 telemetry.update();
             }
 
