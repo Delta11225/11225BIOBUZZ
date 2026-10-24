@@ -31,10 +31,12 @@ public class BerthaTwoSide extends OpMode {
         private final Pose startPose = p.of(55, 8, 270);
         private final Pose CP1 = p.of(40, 18, 270);
         private final Pose collectGardenPose = p.of(26, 10, 200);
-        private final Pose midGardenPose = p.of(18, 10, 200);
+        private final Pose midGardenPose = p.of(15, 10, 200);
         private final Pose endGardenPose = p.of(11, 10, 180);
         private final Pose CP2 = p.of(36, 80, 180);
         private final Pose oppositelaunchPose = p.of(34, 125, 120);
+        private final Pose parkPose = p.of(15, 99, 0);
+        private final Pose CP3 = p.of(46, 102, 0);
 
     private Path toGarden(){
         return curve(startPose, CP1, collectGardenPose).linear(startPose, collectGardenPose)
@@ -62,7 +64,12 @@ public class BerthaTwoSide extends OpMode {
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
-
+    private Path toPark(){
+        return curve(oppositelaunchPose, CP3, parkPose).linear(oppositelaunchPose, parkPose)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
+                );
+    }
     private Command goToGarden(){
         return sequential(
             follow(follower, toGarden())
@@ -77,17 +84,23 @@ public class BerthaTwoSide extends OpMode {
     private Command goToOppositeSideandLaunch(){
         return sequential(
                 follow(follower, toOppositeSide()),
-                launcher.launchSeconds(5.5, 2580)
+                launcher.launchSeconds(4, 2600)
+        );
+    }
+    private Command park(){
+        return sequential(
+                follow(follower, toPark())
         );
     }
 
 
     private Command autoRoutine(){
         return sequential(
-            launcher.launchSeconds(5.5, 2520),
+            launcher.launchSeconds(4, 2550),
             goToGarden(),
             gardenIntake(),
-            goToOppositeSideandLaunch()
+            goToOppositeSideandLaunch(),
+            park()
 
         );
     }
