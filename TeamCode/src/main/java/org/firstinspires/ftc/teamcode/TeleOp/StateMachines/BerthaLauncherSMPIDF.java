@@ -17,7 +17,8 @@ public class BerthaLauncherSMPIDF {
     private DcMotorEx launcher;
 
     public double F = 12.5;
-    public double P = 40;
+    public double P = 50;
+    public double D = 0.03;
 
     boolean lastDpadRightPressed = false;
     boolean lastDpadLeftPressed = false;
@@ -47,7 +48,7 @@ public class BerthaLauncherSMPIDF {
         PIDFCoefficients PIDF = new PIDFCoefficients(
                 P, //P - Corrects based on how far the actual velocity is from the target velocity
                 0, //I - not nessecary for launch motors
-                0, //D - not nessecary fro launch motors
+                D,
                 F //F - Baseline velocity coefficient (usually 1) Ex: (1 x 3300)
         );
 

@@ -217,7 +217,7 @@ public class BerthaTeleOp extends OpMode {
         }
 
         if(launcherRPM){
-            baselauncherRPM = 2600;
+            baselauncherRPM = 2500;
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.REVVING_UP);
 
         }
@@ -238,7 +238,7 @@ public class BerthaTeleOp extends OpMode {
 
         intake.update();
         windmill.update();
-        launcher.update(2600);
+        launcher.update(2500);
     }/////end of peripheral move////////
 
     public void stop(){
