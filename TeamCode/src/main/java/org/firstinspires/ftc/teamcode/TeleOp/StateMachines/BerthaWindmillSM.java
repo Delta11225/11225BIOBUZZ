@@ -12,8 +12,8 @@ public class BerthaWindmillSM {
         IDLE
     }
     private CRServo windmill;
-    private final double forwardPower = 0.5;
-    private final double backwardPower = -0.5;
+    private final double forwardPower = 1.0;
+    private final double backwardPower = -1.0;
     private BerthaWindmillSM.windmillState currentState= BerthaWindmillSM.windmillState.IDLE;
     public void init(HardwareMap hardwareMap){
         windmill = hardwareMap.get(CRServo.class,"windmill");

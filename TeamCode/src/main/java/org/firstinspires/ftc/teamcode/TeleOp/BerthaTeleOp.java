@@ -225,7 +225,7 @@ public class BerthaTeleOp extends OpMode {
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
         }
 
-        if(gamepad2.dpad_up){
+        if(gamepad2.dpad_up && launcher.getLaunchState()==BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
             windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
         }
         else if (gamepad2.dpad_down){
