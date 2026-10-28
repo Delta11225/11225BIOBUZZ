@@ -27,7 +27,7 @@ public class FlyWheel_RPMTuner_JN extends OpMode {
 
             FlyWheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-            FlyWheel.setDirection(DcMotorEx.Direction.REVERSE);
+            FlyWheel.setDirection(DcMotorEx.Direction.FORWARD);
 
         }
 

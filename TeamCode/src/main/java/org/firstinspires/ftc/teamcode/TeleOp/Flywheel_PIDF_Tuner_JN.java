@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Lessons.PIDF;
+package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -8,11 +8,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 @TeleOp
-public class Flywheel_Tuner_Tutorial_JN extends OpMode {
+public class Flywheel_PIDF_Tuner_JN extends OpMode {
     public DcMotorEx flywheelMotor;
-
-    public double highVelocity =1400;
-    public double lowVelocity = 900;
+    static final double TICKS_PER_MOTOR_REV = 28;
+    public double highVelocity =2190;
+    public double lowVelocity = 1500;
 
     double curTargetVelocity = highVelocity;
     double F = 0;
@@ -21,7 +21,7 @@ public class Flywheel_Tuner_Tutorial_JN extends OpMode {
     int stepIndex = 1;
     @Override
     public void init() {
-        flywheelMotor = hardwareMap.get(DcMotorEx.class, "motor1");
+        flywheelMotor = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -35,6 +35,10 @@ public class Flywheel_Tuner_Tutorial_JN extends OpMode {
         //get all our gamepad commands
         //set target velocity
         //update telemetry
+        double targetTPS = (curTargetVelocity / 60.0) * TICKS_PER_MOTOR_REV;
+
+        double actualTPS = flywheelMotor.getVelocity();
+        double curVelocity = actualTPS * 60.0 / TICKS_PER_MOTOR_REV;
 
         if (gamepad1.yWasPressed()) {
             if(curTargetVelocity == highVelocity) {
@@ -65,17 +69,16 @@ public class Flywheel_Tuner_Tutorial_JN extends OpMode {
         flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         //set velocity
-        flywheelMotor.setVelocity(curTargetVelocity);
+        flywheelMotor.setVelocity(targetTPS);
 
-        double curVelocity = flywheelMotor.getVelocity();
         double error = curTargetVelocity - curVelocity;
 
         telemetry.addData("Target Velocity", curTargetVelocity);
         telemetry.addData("Current Velocity", curVelocity);
         telemetry.addData("Error", "%.2f", error);
         telemetry.addLine("------------------------------");
-        telemetry.addData("Tuning P", "%.4f (D-Pad U/D", P);
-        telemetry.addData("Tuning F", "%.4f (D-Pad L/R", F);
+        telemetry.addData("Tuning P", "%.4f (D-Pad U/D)", P);
+        telemetry.addData("Tuning F", "%.4f (D-Pad L/R)", F);
         telemetry.addData("Step Size", "%.4f (B Button)", stepSizes[stepIndex]);
     }
 }
