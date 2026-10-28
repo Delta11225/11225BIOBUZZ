@@ -16,9 +16,9 @@ public class BerthaLauncherSMPIDF {
     // --- 2. Hardware members ---
     private DcMotorEx launcher;
 
-    public double F = 12.5;
-    public double P = 50;
-    public double D = 0.03;
+    public double F = 12.1;
+    public double P = 150;
+    public double D = 0;
 
     boolean lastDpadRightPressed = false;
     boolean lastDpadLeftPressed = false;

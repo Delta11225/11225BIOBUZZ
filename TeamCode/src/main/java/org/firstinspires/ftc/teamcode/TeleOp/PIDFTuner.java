@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class PIDFTuner extends OpMode {
         public DcMotorEx FlyWheel;
         public Servo gate;
-        double firstLaunchRPM = 2250;
+        double firstLaunchRPM = 2250;//og:2250
         double flyWheelRPM = 2250;
         double pChange = 0;
         double fChange = 0;
