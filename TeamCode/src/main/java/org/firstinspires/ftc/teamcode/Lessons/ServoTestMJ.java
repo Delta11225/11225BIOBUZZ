@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.Lessons;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
-
+@Disabled
 @TeleOp
 public class ServoTestMJ extends OpMode {
     public Servo servo1 = null;

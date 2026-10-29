@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.Lessons;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
+@Disabled
 @TeleOp
 public class Touch_Sensor_Test_JN extends OpMode{
     TouchSensor touch;

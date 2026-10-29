@@ -1,9 +1,7 @@
-package org.firstinspires.ftc.teamcode.Lessons;
+package org.firstinspires.ftc.teamcode.TeleOp.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.teamcode.TeleOp.ExampleSM;
 
 @TeleOp
 public class IntakeTeleOpSMJYMJJN extends OpMode {
