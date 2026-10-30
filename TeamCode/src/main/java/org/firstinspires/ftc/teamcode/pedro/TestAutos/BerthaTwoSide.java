@@ -17,6 +17,7 @@ import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.TeleOp.OpModeStorage;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Launcher;
@@ -128,5 +129,18 @@ public class BerthaTwoSide extends OpMode {
     public void loop(){
         follower.update();
         Scheduler.execute();
+    }
+
+    @Override
+    public void stop() {
+        //@Pierson - added to help inherit start pose for teleop
+        //@Pierson - make sure these lines are at the end of every auto
+
+        //Save the robot's final position when Auto ends
+        OpModeStorage.autonomousEndPose = follower.pose();
+
+        //Indicate that a valid Auto position was saved
+        OpModeStorage.autoPoseSaved = true;
+
     }
 }
