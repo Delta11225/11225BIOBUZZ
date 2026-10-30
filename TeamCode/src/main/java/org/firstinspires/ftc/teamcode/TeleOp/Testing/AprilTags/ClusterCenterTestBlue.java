@@ -10,9 +10,7 @@ import java.util.Arrays;
 @TeleOp(name = "Cluster Center Test BLUE", group = "Vision")
 public class ClusterCenterTestBlue extends OpMode {
 
-    // Pipeline 0 = Blue
-    //Pipeline 1 = Red
-    private static final int CLUSTER_PIPELINE = 0;//Blue
+    private static final int CLUSTER_PIPELINE = 0;// Pipeline 0 = Blue, Pipeline 1 = Red
 
     // Change this to your camera's actual upward angle
     //camera facing straight out is 0

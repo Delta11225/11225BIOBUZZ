@@ -164,9 +164,6 @@ public class BerthaTeleOp extends OpMode {
 
         double theta = Math.toRadians(currentAngle);
 
-        telemetry.addData("CurrentAngle", currentAngle);
-        telemetry.addData("Theta", theta);
-
         //Orientation set for robot facing away from driver
         forward = -gamepad1.left_stick_y; //left joystick up
         right = gamepad1.left_stick_x * 1.1; //left joystick right, adjusting for strafe
@@ -195,9 +192,9 @@ public class BerthaTeleOp extends OpMode {
         if (gamepad1.left_bumper) {
             powerMultiplier = .8;//FAST MODE
         } else if (gamepad1.right_bumper) {
-            powerMultiplier = .3; //SLOW MODE
+            powerMultiplier = .5; //SLOW MODE
         } else {
-            powerMultiplier = .6; //NORMAL MODE
+            powerMultiplier = 1; //NORMAL MODE
         }
 
 
