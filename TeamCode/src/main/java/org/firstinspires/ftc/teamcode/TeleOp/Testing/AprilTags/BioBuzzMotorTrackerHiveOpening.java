@@ -31,7 +31,7 @@ public class BioBuzzMotorTrackerHiveOpening extends OpMode {
 
     // Camera pitch angle in degrees.
     // Use 0.0 if the camera is level.
-    private static final double CAMERA_PITCH_DEG = 0.0;
+    private static final double CAMERA_PITCH_DEG = 35;
 
 
     ///////////////////////////////// MOTOR ROTATION SETTINGS /////////////////////////////////
