@@ -92,7 +92,7 @@ public class BerthaLauncherSMPIDF {
         PIDFCoefficients PIDF = new PIDFCoefficients(
                 P, //P - Corrects based on how far the actual velocity is from the target velocity
                 0, //I - not nessecary for launch motors
-                0, //D - not nessecary fro launch motors
+                0, //D - not nessecary for launch motors
                 F //F - Baseline velocity coefficient (usually 1) Ex: (1 x 3300)
         );
 
