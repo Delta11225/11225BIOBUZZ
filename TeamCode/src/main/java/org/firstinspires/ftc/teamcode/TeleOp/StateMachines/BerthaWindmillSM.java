@@ -33,6 +33,7 @@ public class BerthaWindmillSM {
                 break;
             case BACKWARDS:
                 windmill.setPower(backwardPower);
+                break;
             case IDLE:
                 windmill.setPower(0);
                 break;

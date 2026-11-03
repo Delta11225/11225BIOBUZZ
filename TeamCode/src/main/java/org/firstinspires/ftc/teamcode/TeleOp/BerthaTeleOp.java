@@ -200,42 +200,55 @@ public class BerthaTeleOp extends OpMode {
 
     }/////end of move////////
     public void peripheral() {
-        boolean launcherRPM = gamepad2.x;
-        boolean launcherOff = gamepad2.a;
 
+        ///////////////////////////////////INTAKE///////////////////////////////////////
         if(gamepad2.right_bumper) {
             intake.setState(BerthaIntakeSMV2.MotorState.INTAKE);
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
+            windmill.setState(BerthaWindmillSM.windmillState.IDLE);
         }
         else if(gamepad2.left_bumper){
             intake.setState(BerthaIntakeSMV2.MotorState.OUTTAKE);
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
+            windmill.setState(BerthaWindmillSM.windmillState.IDLE);
         }
         else{
             intake.setState(BerthaIntakeSMV2.MotorState.IDLE);
         }
 
-        if(launcherRPM){
+        ///////////////////////////////////LAUNCHER/WINDMILL///////////////////////////////////////
+        if(gamepad2.x){
             baselauncherRPM = 2500;
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.REVVING_UP);
-
         }
-        else if (launcherOff) {
+        else if (gamepad2.a) {
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
         }
 
-        if(gamepad2.dpad_up && launcher.getLaunchState()==BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
+
+
+        if(launcher.getLaunchState()==BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
+
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.LAUNCHING);//getting here
+            windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
+        }
+
+        //////////////////////////////////WINDMILO
+        if(gamepad2.dpad_up){
             windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
         }
         else if (gamepad2.dpad_down){
             windmill.setState(BerthaWindmillSM.windmillState.BACKWARDS);
         }
-        else{
-            windmill.setState(BerthaWindmillSM.windmillState.IDLE);
-
-        }
 
         intake.update();
         windmill.update();
-        launcher.update(2500);
+        launcher.update(baselauncherRPM);
+
+        telemetry.addData("launcher state",launcher.getLaunchState());
+        telemetry.addData("windmill state",windmill.getState());
+        telemetry.update();
+
     }/////end of peripheral move////////
 
     public void stop(){
