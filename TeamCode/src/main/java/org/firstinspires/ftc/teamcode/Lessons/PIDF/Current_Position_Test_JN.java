@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.Lessons.PIDF;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+@Disabled
 @TeleOp
 public class Current_Position_Test_JN extends OpMode {
     public DcMotor motor1 = null;

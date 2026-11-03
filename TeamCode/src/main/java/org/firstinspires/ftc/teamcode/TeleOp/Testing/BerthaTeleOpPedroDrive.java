@@ -74,7 +74,7 @@ public class BerthaTeleOpPedroDrive extends OpMode {
             powerMultiplier = 1.0;
         }
         else if (gamepad1.right_bumper) {//slow mode
-            powerMultiplier = 0.5;
+            powerMultiplier = 0.4;
         }
         else {
             powerMultiplier = 0.8;//normal
