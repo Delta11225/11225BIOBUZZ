@@ -52,7 +52,7 @@ public class Launcher {
 
                     if(Math.abs(currentFlywheelRPM-launchRPM)<RPMTolerance){
                         intake.setPower(1);
-                        windmill.setPower(0.75);
+                        windmill.setPower(0.85);
                     }
                 })
                 .setDone(() -> {

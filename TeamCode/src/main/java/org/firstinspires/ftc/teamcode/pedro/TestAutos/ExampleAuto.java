@@ -22,15 +22,18 @@ import org.firstinspires.ftc.teamcode.pedro.Subsystems.Launcher;
 
 @Autonomous
 public class ExampleAuto extends OpMode {
+    //import external classes
     private Follower follower;
     private Intake intake;
     private Launcher launcher;
-    private final PoseFactory p = PoseFactory.degrees();
+    private final PoseFactory p = PoseFactory.degrees(); //set all poses
         private final Pose startPose = p.of(72, 12, 90);
         private final Pose endLinepose = p.of(72, 72, 270);
         private final Pose CP1 = p.of(72, 24, 90);
         private final Pose endCurvePose = p.of(24, 24, 90);
 
+
+    //define paths (ONLY drivetrain movement!!)
     private Path goStraight(){
         return line(startPose, endLinepose).linear(startPose, endLinepose)
                 .with(
@@ -44,6 +47,7 @@ public class ExampleAuto extends OpMode {
                 );
     }
 
+    //define commands (movement AND subsystem action)
     private Command forward(){
         return sequential(
             follow(follower, goStraight())
@@ -56,6 +60,8 @@ public class ExampleAuto extends OpMode {
         );
     }
 
+
+    //condense everything together into one singular executable command
     private Command autoRoutine(){
         return sequential(
             launcher.launchSeconds(3, 2520),
@@ -66,16 +72,20 @@ public class ExampleAuto extends OpMode {
 
     @Override
     public void init(){
-        Scheduler.reset();
+        Scheduler.reset(); //reset any previously scheduled commands on init
 
+        //init all hardware for drivetrain + subsystems
         follower = Constants.create(hardwareMap);
         intake = new Intake(hardwareMap);
         launcher = new Launcher(hardwareMap);
 
+        //set the start pose and update the follower to include that start pose
         follower.setPose(startPose);
         follower.update();
     }
 
+
+    //schedule any commands you want to run in your auto
     @Override
     public void start(){
         schedule(
@@ -83,6 +93,7 @@ public class ExampleAuto extends OpMode {
         );
     }
 
+    //continuously update the follower and execute your commands as the auto runs
     @Override
     public void loop(){
         follower.update();
