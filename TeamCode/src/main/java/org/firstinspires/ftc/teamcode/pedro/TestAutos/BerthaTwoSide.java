@@ -85,7 +85,7 @@ public class BerthaTwoSide extends OpMode {
     private Command goToOppositeSideandLaunch(){
         return sequential(
                 follow(follower, toOppositeSide()),
-                launcher.launchSeconds(4, 2600)
+                launcher.launchSeconds(4, 2480)
         );
     }
     private Command park(){
@@ -97,7 +97,7 @@ public class BerthaTwoSide extends OpMode {
 
     private Command autoRoutine(){
         return sequential(
-            launcher.launchSeconds(4, 2550),
+            launcher.launchSeconds(4, 2450),
             goToGarden(),
             gardenIntake(),
             goToOppositeSideandLaunch(),

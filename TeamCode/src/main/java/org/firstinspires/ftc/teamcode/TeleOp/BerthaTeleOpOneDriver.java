@@ -190,9 +190,9 @@ public class BerthaTeleOpOneDriver extends OpMode {
 
         //add speed control here
 
-        if (gamepad1.circle) {
+        if (gamepad1.cross) {
             powerMultiplier = .8;//FAST MODE
-        } else if (gamepad1.cross) {
+        } else if (gamepad1.circle) {
             powerMultiplier = .4; //SLOW MODE
         } else {
             powerMultiplier = 1; //NORMAL MODE
@@ -227,7 +227,7 @@ public class BerthaTeleOpOneDriver extends OpMode {
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
         }
 
-        if(gamepad1.dpad_up){
+        if(gamepad1.right_trigger_pressed && launcher.getLaunchState() == BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
             windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
         }
         else if (gamepad1.dpad_down){
