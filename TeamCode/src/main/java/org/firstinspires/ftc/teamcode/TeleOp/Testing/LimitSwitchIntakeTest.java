@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 @TeleOp
 public class LimitSwitchIntakeTest extends OpMode {
+    private final IntakeSMJYMJJN intake = new IntakeSMJYMJJN();
 
     private TouchSensor magnet;
     private int magnetCount = 0;
@@ -15,22 +16,31 @@ public class LimitSwitchIntakeTest extends OpMode {
 
 
     @Override
-    public void init(){
+    public void init() {
         magnet = hardwareMap.get(TouchSensor.class, "limit_switch");
 
     }
+
     @Override
-    public void loop(){
+    public void loop() {
         telemetry.addData("Presses", magnetCount);
         boolean magnetStateRightNow = magnet.isPressed();
 
-        if (magnetStateRightNow == true && magnetStateLastLoop == false){
+        if (magnetStateRightNow == true && magnetStateLastLoop == false) {
             magnetCount += 1;
         }
         magnetStateLastLoop = magnetStateRightNow;
 
-        telemetry.addData("Total Magnet Passes", magnetCount);
         telemetry.addData("Is Magnet Present Now?", magnetStateRightNow);
         telemetry.update();
+
+        if (magnetCount == 4) {
+            intake.setState(IntakeSMJYMJJN.MotorState.IDLE);
+        }
+        telemetry.addData("Magnet Count", magnetCount);
+
+        if (gamepad1.a) {
+
+        }
     }
 }
