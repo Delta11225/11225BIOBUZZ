@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedro.TestAutos;
+package org.firstinspires.ftc.teamcode.Competition.Auto;
 
 import static com.pedropathing.api.Paths.curve;
 import static com.pedropathing.api.Paths.line;
