@@ -9,7 +9,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 
 @TeleOp(name = "BIOBUZZ Motor Tracker w/ Telemetry", group = "Vision")
-public class BioBuzzMotorTrackerTelemetry extends OpMode {
+public class BioBuzzClusterTelemetry extends OpMode {
 
     // Limelight camera used to detect the AprilTag clusters.
     private Limelight3A limelight;
