@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.pedro.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Launcher;
 
 
-@Autonomous
+@Autonomous(preselectTeleOp = "BerthaTeleOpOneDriver")
 public class BerthaTwoSide extends OpMode {
     private Follower follower;
     private Intake intake;
