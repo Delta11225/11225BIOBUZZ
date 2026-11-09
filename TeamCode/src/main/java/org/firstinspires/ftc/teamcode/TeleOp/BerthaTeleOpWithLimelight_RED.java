@@ -15,13 +15,12 @@ import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaLauncherSMPIDF;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaWindmillSM;
 
 @TeleOp
-public class BerthaTeleOpWithLimelight extends OpMode {
+public class BerthaTeleOpWithLimelight_RED extends OpMode {
 
     public DcMotor rearLeft = null;
     public DcMotor rearRight = null;
     public DcMotor frontLeft = null;
     public DcMotor frontRight = null;
-    private Limelight3A limelight;
 
     private final BerthaIntakeSMV2 intake = new BerthaIntakeSMV2();
     private final BerthaWindmillSM windmill = new BerthaWindmillSM();
@@ -50,6 +49,10 @@ public class BerthaTeleOpWithLimelight extends OpMode {
     double currentAngle;
 
     double baselauncherRPM = 0;
+
+    private Limelight3A limelight;
+    private static final int PIPELINE = 3;
+    private static final double ALLIANCE = 1.0;
     private static final double CAMERA_PITCH_DEG = 35;
     private static final int CLUSTER_PIPELINE = 3;
     private static final int CLUSTER_ID = 0;
@@ -60,6 +63,24 @@ public class BerthaTeleOpWithLimelight extends OpMode {
     private static final int ELEVATION = 5;
     private static final int STICKER_PITCH = 6;
     private static final int ROLL = 7;
+
+    /////////////////////////////// APRILTAG CLUSTER INFORMATION ///////////////////////////////
+
+    // Base ID of the detected cluster. -1 means no cluster detected.
+    private double clusterID = -1;
+
+    // Number of AprilTags currently visible.
+    private double tagCount = 0;
+
+    // Bearing to the AprilTag cluster center.
+    private double clusterBearing = 0;
+
+    // Bearing to the predicted HIVE opening center.
+    // This is the value used to control the camera motor.
+    private double openingBearing = 0;
+
+    // Horizontal floor distance to the AprilTag cluster center, in inches.
+    private double range = 0;
 
     @Override
     public void init() {
@@ -109,7 +130,7 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
 
-        limelight.pipelineSwitch(CLUSTER_PIPELINE);
+        limelight.pipelineSwitch(PIPELINE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
@@ -117,6 +138,7 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         telemetry.addData("Device Version Number:", odo.getDeviceVersion());
         telemetry.addData("Heading Scalar", odo.getYawScalar());
         telemetry.addLine("Limelight found");
+        telemetry.addData("Pipeline", PIPELINE);
         telemetry.update();
 
         //robot = new HardwareITD(hardwareMap);
@@ -153,6 +175,7 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
     }
 
+
     @Override
     public void start() {
         boolean switched = limelight.pipelineSwitch(CLUSTER_PIPELINE);
@@ -167,6 +190,7 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         });
 
         limelight.start();
+        limelight.updatePythonInputs(new double[]{ALLIANCE, CAMERA_PITCH_DEG});
 
         currentAngle = 0;
         runtime.reset();
@@ -184,6 +208,69 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         currentAngle =pos.getHeading(AngleUnit.DEGREES);
         move();
         peripheral();
+
+        LLResult result = limelight.getLatestResult();
+
+        clusterID = -1;
+        tagCount = 0;
+        clusterBearing = 0;
+        openingBearing = 0;
+        range = 0;
+
+        // Check that a result exists and Python returned at least nine values.
+        if (result != null && result.getPythonOutput() != null
+                && result.getPythonOutput().length >= 9) {
+
+            // Store the Python output.
+            double[] python = result.getPythonOutput();
+
+            // Read the cluster information.
+            clusterID = python[0];
+            tagCount = python[1];
+            range = python[2];
+
+            // Original bearing to the AprilTag cluster center.
+            clusterBearing = python[3];
+
+            // New bearing to the predicted HIVE opening center.
+            // This is the bearing we want the camera to track.
+            openingBearing = python[8];
+
+            // A target is visible if a valid cluster ID and at least one tag are detected.
+            boolean targetVisible = clusterID >= 0 && tagCount > 0;
+
+            if (targetVisible) {
+
+                ////////////////////// DETERMINE OFFSET //////////////////////
+                telemetry.addData("HIVE Opening Offset", "%.2f degrees", openingBearing);
+
+            }
+
+            else {
+                // No recognized cluster is visible.
+                telemetry.addLine("No Cluster Detected");
+            }
+        }
+
+        else {
+            // No valid Python output.
+            telemetry.addLine("No output");
+        }
+
+
+
+        ////////////////////////////////// TELEMETRY //////////////////////////////////////
+
+        telemetry.addData("Pipeline", PIPELINE);
+        telemetry.addData("Cluster ID", clusterID);
+        telemetry.addData("Tags Seen", tagCount);
+
+        telemetry.addData("Cluster Bearing", "%.2f degrees", clusterBearing);
+        telemetry.addData("HIVE Opening Bearing", "%.2f degrees", openingBearing);
+
+        telemetry.addData("Range to Cluster", "%.2f inches", range);
+
+        telemetry.update();
     }
 
     /////////////////////////move sequence//////////////////////////
@@ -269,6 +356,7 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         intake.stop();
         launcher.stop();
         windmill.stop();
+        limelight.stop();
     }
 
 } //end of opmode
