@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.TeleOp;
+package org.firstinspires.ftc.teamcode.Competition.TeleOp;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -10,18 +10,18 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.TeleOp.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaIntakeSMV2;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaLauncherSMPIDF;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaWindmillSM;
 
 @TeleOp
-public class BerthaTeleOpWithLimelight extends OpMode {
+public class BerthaTeleOpOneDriver_LL_RED extends OpMode {
 
     public DcMotor rearLeft = null;
     public DcMotor rearRight = null;
     public DcMotor frontLeft = null;
     public DcMotor frontRight = null;
-    private Limelight3A limelight;
 
     private final BerthaIntakeSMV2 intake = new BerthaIntakeSMV2();
     private final BerthaWindmillSM windmill = new BerthaWindmillSM();
@@ -50,6 +50,11 @@ public class BerthaTeleOpWithLimelight extends OpMode {
     double currentAngle;
 
     double baselauncherRPM = 0;
+
+
+    private Limelight3A limelight;
+    private static final int PIPELINE = 3;
+    private static final double ALLIANCE = 1.0;
     private static final double CAMERA_PITCH_DEG = 35;
     private static final int CLUSTER_PIPELINE = 3;
     private static final int CLUSTER_ID = 0;
@@ -60,6 +65,24 @@ public class BerthaTeleOpWithLimelight extends OpMode {
     private static final int ELEVATION = 5;
     private static final int STICKER_PITCH = 6;
     private static final int ROLL = 7;
+
+    /////////////////////////////// APRILTAG CLUSTER INFORMATION ///////////////////////////////
+
+    // Base ID of the detected cluster. -1 means no cluster detected.
+    private double clusterID = -1;
+
+    // Number of AprilTags currently visible.
+    private double tagCount = 0;
+
+    // Bearing to the AprilTag cluster center.
+    private double clusterBearing = 0;
+
+    // Bearing to the predicted HIVE opening center.
+    // This is the value used to control the camera motor.
+    private double openingBearing = 0;
+
+    // Horizontal floor distance to the AprilTag cluster center, in inches.
+    private double range = 0;
 
     @Override
     public void init() {
@@ -108,7 +131,7 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
 
-        limelight.pipelineSwitch(CLUSTER_PIPELINE);
+        limelight.pipelineSwitch(PIPELINE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
@@ -116,6 +139,14 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         telemetry.addData("Device Version Number:", odo.getDeviceVersion());
         telemetry.addData("Heading Scalar", odo.getYawScalar());
         telemetry.addLine("Limelight found");
+        telemetry.addData("Pipeline", PIPELINE);
+        telemetry.update();
+
+        telemetry.addData("Status", "Initialized");
+        telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
+        telemetry.addData("Y offset", odo.getYOffset(DistanceUnit.MM));
+        telemetry.addData("Device Version Number:", odo.getDeviceVersion());
+        telemetry.addData("Heading Scalar", odo.getYawScalar());
         telemetry.update();
 
         //robot = new HardwareITD(hardwareMap);
@@ -166,6 +197,7 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         });
 
         limelight.start();
+        limelight.updatePythonInputs(new double[]{ALLIANCE, CAMERA_PITCH_DEG});
 
         currentAngle = 0;
         runtime.reset();
@@ -183,6 +215,70 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         currentAngle =pos.getHeading(AngleUnit.DEGREES);
         move();
         peripheral();
+
+
+        LLResult result = limelight.getLatestResult();
+
+        clusterID = -1;
+        tagCount = 0;
+        clusterBearing = 0;
+        openingBearing = 0;
+        range = 0;
+
+        // Check that a result exists and Python returned at least nine values.
+        if (result != null && result.getPythonOutput() != null
+                && result.getPythonOutput().length >= 9) {
+
+            // Store the Python output.
+            double[] python = result.getPythonOutput();
+
+            // Read the cluster information.
+            clusterID = python[0];
+            tagCount = python[1];
+            range = python[2];
+
+            // Original bearing to the AprilTag cluster center.
+            clusterBearing = python[3];
+
+            // New bearing to the predicted HIVE opening center.
+            // This is the bearing we want the camera to track.
+            openingBearing = python[8];
+
+            // A target is visible if a valid cluster ID and at least one tag are detected.
+            boolean targetVisible = clusterID >= 0 && tagCount > 0;
+
+            if (targetVisible) {
+
+                ////////////////////// DETERMINE OFFSET //////////////////////
+                telemetry.addData("HIVE Opening Offset", "%.2f degrees", openingBearing);
+
+            }
+
+            else {
+                // No recognized cluster is visible.
+                telemetry.addLine("No Cluster Detected");
+            }
+        }
+
+        else {
+            // No valid Python output.
+            telemetry.addLine("No output");
+        }
+
+
+
+        ////////////////////////////////// TELEMETRY //////////////////////////////////////
+
+        telemetry.addData("Pipeline", PIPELINE);
+        telemetry.addData("Cluster ID", clusterID);
+        telemetry.addData("Tags Seen", tagCount);
+
+        telemetry.addData("Cluster Bearing", "%.2f degrees", clusterBearing);
+        telemetry.addData("HIVE Opening Bearing", "%.2f degrees", openingBearing);
+
+        telemetry.addData("Range to Cluster", "%.2f inches", range);
+
+        telemetry.update();
     }
 
     /////////////////////////move sequence//////////////////////////
@@ -190,10 +286,31 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
         double theta = Math.toRadians(currentAngle);
 
+        telemetry.addData("CurrentAngle", currentAngle);
+        telemetry.addData("Theta", theta);
+
         //Orientation set for robot facing away from driver
         forward = -gamepad1.left_stick_y; //left joystick up
         right = gamepad1.left_stick_x * 1.1; //left joystick right, adjusting for strafe
-        clockwise = gamepad1.right_stick_x; //right joystick right (up on FTC Dashboard)
+        //clockwise = gamepad1.right_stick_x; //right joystick right (up on FTC Dashboard)
+        //Checking to see if correct april tag for alliance color is visible
+        boolean targetVisible = clusterID >= 0 && tagCount > 0;
+        boolean autoAlignActive = gamepad1.a && targetVisible;
+
+        //code to auto align is active based on boolean settings above
+        if (autoAlignActive) {
+
+            telemetry.addData("Horizontal Offset (Yaw)", openingBearing);
+
+            double kP_turn = 0.025; //what rate ur turning
+            clockwise = clamp(-kP_turn*openingBearing, -0.65,0.65);
+
+        }
+        else{
+            //manual rotation contol (a button NOT pressed OR no april tag detected)
+            clockwise = gamepad1.right_stick_x;
+        }
+
 
         temp = (forward * Math.cos(theta) - right * Math.sin(theta));
         side = (forward * Math.sin(theta) + right * Math.cos(theta));
@@ -215,10 +332,10 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
         //add speed control here
 
-        if (gamepad1.left_bumper) {
+        if (gamepad1.cross) {
             powerMultiplier = .8;//FAST MODE
-        } else if (gamepad1.right_bumper) {
-            powerMultiplier = .5; //SLOW MODE
+        } else if (gamepad1.circle) {
+            powerMultiplier = .4; //SLOW MODE
         } else {
             powerMultiplier = 1; //NORMAL MODE
         }
@@ -226,21 +343,25 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
     }/////end of move////////
     public void peripheral() {
-        boolean launcherRPM = gamepad2.x;
-        boolean launcherOff = gamepad2.a;
+        boolean launcherRPM = gamepad1.x;
+        boolean launcherOff = gamepad1.b;
 
-        if(gamepad2.right_bumper) {
+        if(gamepad1.right_bumper) {
             intake.setState(BerthaIntakeSMV2.MotorState.INTAKE);
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
+            windmill.setState(BerthaWindmillSM.windmillState.IDLE);
         }
-        else if(gamepad2.left_bumper){
+        else if(gamepad1.left_bumper){
             intake.setState(BerthaIntakeSMV2.MotorState.OUTTAKE);
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
+            windmill.setState(BerthaWindmillSM.windmillState.IDLE);
         }
         else{
             intake.setState(BerthaIntakeSMV2.MotorState.IDLE);
         }
 
         if(launcherRPM){
-            baselauncherRPM = 2500;
+            baselauncherRPM = 2450;
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.REVVING_UP);
 
         }
@@ -248,10 +369,10 @@ public class BerthaTeleOpWithLimelight extends OpMode {
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
         }
 
-        if(gamepad2.dpad_up && launcher.getLaunchState()==BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
+        if(gamepad1.right_trigger_pressed && launcher.getLaunchState() == BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
             windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
         }
-        else if (gamepad2.dpad_down){
+        else if (gamepad1.dpad_down){
             windmill.setState(BerthaWindmillSM.windmillState.BACKWARDS);
         }
         else{
@@ -261,13 +382,18 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
         intake.update();
         windmill.update();
-        launcher.update(2500);
+        launcher.update(baselauncherRPM);
     }/////end of peripheral move////////
 
     public void stop(){
         intake.stop();
         launcher.stop();
         windmill.stop();
+        limelight.stop();
+    }
+    //Helper clamp method for rotation correction
+    private double clamp (double value, double min, double max){
+        return Math.max(min, Math.min(max, value));
     }
 
 } //end of opmode
