@@ -22,7 +22,7 @@ public class BioBuzzHiveOpeningTelemetry extends OpMode {
     // Alliance input sent to the Python SnapScript.
     // 0.0 = Blue, 1.0 = Red.
     // The separate red script uses its own hardcoded alliance selection.
-    private static final double ALLIANCE = 0.0;
+    private static final double ALLIANCE = 1.0;
 
     // Camera pitch angle in degrees.
     // Use 0.0 if the camera is level.

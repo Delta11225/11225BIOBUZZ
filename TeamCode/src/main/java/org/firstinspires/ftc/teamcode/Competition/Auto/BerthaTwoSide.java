@@ -36,8 +36,13 @@ public class BerthaTwoSide extends OpMode {
         private final Pose endGardenPose = p.of(11, 10, 180);
         private final Pose CP2 = p.of(36, 80, 180);
         private final Pose oppositelaunchPose = p.of(34, 125, 120);
+        private final Pose CP3 = p.of(76, 113, 120);
+        private final Pose flowerDropPose = p.of(50.4, 124.3, 125);
+        private final Pose CP4 = p.of(41, 117,90);
+        private final Pose readyIntakePose = p.of(33, 132, 180);
+        private final Pose finalIntakePose = p.of(12, 133, 180);
         private final Pose parkPose = p.of(15, 99, 0);
-        private final Pose CP3 = p.of(46, 102, 0);
+        private final Pose CP5 = p.of(46, 102, 0);
 
     private Path toGarden(){
         return curve(startPose, CP1, collectGardenPose).linear(startPose, collectGardenPose)
@@ -65,8 +70,32 @@ public class BerthaTwoSide extends OpMode {
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
+    private Path toFlower(){
+        return curve(oppositelaunchPose, CP3, flowerDropPose).linear(oppositelaunchPose, flowerDropPose)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(0.45)
+                );
+    }
+    private Path toReadyIntake(){
+        return curve(flowerDropPose, CP4, readyIntakePose).linear(flowerDropPose, readyIntakePose)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
+                );
+    }
+    private Path toIntakeFlowerPollen(){
+        return line(readyIntakePose, finalIntakePose).constant(readyIntakePose)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(0.5)
+                );
+    }
+    private Path toThirdLaunch(){
+        return line(finalIntakePose, oppositelaunchPose).linear(finalIntakePose, oppositelaunchPose)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
+                );
+    }
     private Path toPark(){
-        return curve(oppositelaunchPose, CP3, parkPose).linear(oppositelaunchPose, parkPose)
+        return curve(oppositelaunchPose, CP5, parkPose).linear(oppositelaunchPose, parkPose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
@@ -88,6 +117,29 @@ public class BerthaTwoSide extends OpMode {
                 launcher.launchSeconds(4, 2480)
         );
     }
+    private Command dropFlowerPollen(){
+        return sequential(
+                follow(follower, toFlower()),
+                intake.intakeSeconds(2)
+        );
+    }
+    private Command readyIntake(){
+        return sequential(
+                follow(follower, toReadyIntake())
+        );
+    }
+    private Command intakeFlowerPollen(){
+        return parallel(
+                follow(follower, toIntakeFlowerPollen()),
+                intake.intakeSeconds(3)
+        );
+    }
+    private Command thirdLaunch(){
+        return sequential(
+                follow(follower, toThirdLaunch()),
+                launcher.launchSeconds(4, 2480)
+        );
+    }
     private Command park(){
         return sequential(
                 follow(follower, toPark())
@@ -101,6 +153,10 @@ public class BerthaTwoSide extends OpMode {
             goToGarden(),
             gardenIntake(),
             goToOppositeSideandLaunch(),
+            dropFlowerPollen(),
+            readyIntake(),
+            intakeFlowerPollen(),
+            thirdLaunch(),
             park()
 
         );

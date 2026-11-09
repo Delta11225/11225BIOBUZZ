@@ -30,7 +30,7 @@ public class BerthaOneSideWAIT extends OpMode {
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(58, 136, 90);
         private final Pose CP1 = p.of(62.14, 126.29,90);
-        private final Pose flowerDropPose = p.of(47, 132, 125);
+        private final Pose flowerDropPose = p.of(47.5, 132, 125);
         private final Pose CP2 = p.of(50.83, 115.74,90);
         private final Pose readyIntakePose = p.of(33, 135, 180);
         private final Pose finalIntakePose = p.of(9.4, 137.5, 180);

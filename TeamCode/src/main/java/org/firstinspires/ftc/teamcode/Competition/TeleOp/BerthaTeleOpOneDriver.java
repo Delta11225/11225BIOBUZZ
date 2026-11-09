@@ -203,7 +203,7 @@ public class BerthaTeleOpOneDriver extends OpMode {
     }/////end of move////////
     public void peripheral() {
         boolean launcherRPM = gamepad1.x;
-        boolean launcherOff = gamepad1.a;
+        boolean launcherOff = gamepad1.b;
 
         if(gamepad1.right_bumper) {
             intake.setState(BerthaIntakeSMV2.MotorState.INTAKE);
