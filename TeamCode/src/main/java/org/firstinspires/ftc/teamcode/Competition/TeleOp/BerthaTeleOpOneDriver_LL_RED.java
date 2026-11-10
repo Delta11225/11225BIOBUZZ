@@ -303,7 +303,7 @@ public class BerthaTeleOpOneDriver_LL_RED extends OpMode {
             telemetry.addData("Horizontal Offset (Yaw)", openingBearing);
 
             double kP_turn = 0.025; //what rate ur turning
-            clockwise = clamp(-kP_turn*openingBearing, -0.65,0.65);
+            clockwise = clamp(-kP_turn*openingBearing, -0.725,0.725);
 
         }
         else{
