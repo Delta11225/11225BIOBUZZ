@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Competition.TeleOp;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaIntakeSMV2;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaLauncherSMPIDF;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaWindmillSM;
 
+@TeleOp
 public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
     public DcMotor rearLeft = null;
     public DcMotor rearRight = null;
@@ -53,7 +55,6 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
     private static final int PIPELINE = 2;
     private static final double ALLIANCE = 0.0;
     private static final double CAMERA_PITCH_DEG = 35;
-    private static final int CLUSTER_PIPELINE = 3;
     private static final int CLUSTER_ID = 0;
     private static final int NUM_TAGS = 1;
     private static final int RANGE = 2;
@@ -182,10 +183,10 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
 
     @Override
     public void start() {
-        boolean switched = limelight.pipelineSwitch(CLUSTER_PIPELINE);
+        boolean switched = limelight.pipelineSwitch(PIPELINE);
 
         telemetry.addData("Pipeline switch accepted", switched);
-        telemetry.addData("Expected pipeline slot", CLUSTER_PIPELINE);
+        telemetry.addData("Expected pipeline slot", PIPELINE);
         telemetry.update();
 
         limelight.updatePythonInputs(new double[] {
@@ -300,7 +301,7 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
             telemetry.addData("Horizontal Offset (Yaw)", openingBearing);
 
             double kP_turn = 0.025; //what rate ur turning
-            clockwise = clamp(-kP_turn*openingBearing, -0.65,0.65);
+            clockwise = clamp(-kP_turn*openingBearing, -0.725,0.725);
 
         }
         else{

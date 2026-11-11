@@ -56,7 +56,6 @@ public class BerthaTeleOpOneDriver_LL_RED extends OpMode {
     private static final int PIPELINE = 3;
     private static final double ALLIANCE = 1.0;
     private static final double CAMERA_PITCH_DEG = 35;
-    private static final int CLUSTER_PIPELINE = 3;
     private static final int CLUSTER_ID = 0;
     private static final int NUM_TAGS = 1;
     private static final int RANGE = 2;
@@ -185,10 +184,10 @@ public class BerthaTeleOpOneDriver_LL_RED extends OpMode {
 
     @Override
     public void start() {
-        boolean switched = limelight.pipelineSwitch(CLUSTER_PIPELINE);
+        boolean switched = limelight.pipelineSwitch(PIPELINE);
 
         telemetry.addData("Pipeline switch accepted", switched);
-        telemetry.addData("Expected pipeline slot", CLUSTER_PIPELINE);
+        telemetry.addData("Expected pipeline slot", PIPELINE);
         telemetry.update();
 
         limelight.updatePythonInputs(new double[] {
