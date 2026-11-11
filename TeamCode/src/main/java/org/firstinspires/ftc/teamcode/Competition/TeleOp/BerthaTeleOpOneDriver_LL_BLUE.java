@@ -5,6 +5,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -21,6 +22,7 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
     public DcMotor rearRight = null;
     public DcMotor frontLeft = null;
     public DcMotor frontRight = null;
+    public Servo flowerArm = null;
 
     private final BerthaIntakeSMV2 intake = new BerthaIntakeSMV2();
     private final BerthaWindmillSM windmill = new BerthaWindmillSM();
@@ -50,7 +52,10 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
 
     double baselauncherRPM = 0;
 
-
+    double FLOWER_ARM_UP = 0.6;
+    double FLOWER_ARM_DOWN = 0.042;
+    boolean prevY = false;
+    boolean flowerArmUp = true;
     private Limelight3A limelight;
     private static final int PIPELINE = 2;
     private static final double ALLIANCE = 0.0;
@@ -174,6 +179,9 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
         intake.init(hardwareMap);
         windmill.init(hardwareMap);
         launcher.init(hardwareMap);
+
+        flowerArm = hardwareMap.servo.get("flower_arm");
+        flowerArm.setPosition(FLOWER_ARM_UP);
 
     }
     @Override
@@ -330,10 +338,10 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
 
         //add speed control here
 
-        if (gamepad1.cross) {
+        if (gamepad1.circle) {
             powerMultiplier = .8;//FAST MODE
-        } else if (gamepad1.circle) {
-            powerMultiplier = .4; //SLOW MODE
+        } else if (gamepad1.cross) {
+            powerMultiplier = .3; //SLOW MODE
         } else {
             powerMultiplier = 1; //NORMAL MODE
         }
@@ -342,8 +350,8 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
     }/////end of move////////
     public void peripheral() {
         boolean launcherRPM = gamepad1.x;
-        boolean launcherOff = gamepad1.b;
 
+        /////////INTAKE LOGIC//////////
         if(gamepad1.right_bumper) {
             intake.setState(BerthaIntakeSMV2.MotorState.INTAKE);
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
@@ -358,15 +366,14 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
             intake.setState(BerthaIntakeSMV2.MotorState.IDLE);
         }
 
+        ///////////LAUNCHER LOGIC//////////
         if(launcherRPM){
             baselauncherRPM = 2450;
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.REVVING_UP);
 
         }
-        else if (launcherOff) {
-            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
-        }
 
+        //////////WINDMILL LOGIC/////////
         if(gamepad1.right_trigger_pressed && launcher.getLaunchState() == BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
             windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
         }
@@ -377,6 +384,23 @@ public class BerthaTeleOpOneDriver_LL_BLUE extends OpMode {
             windmill.setState(BerthaWindmillSM.windmillState.IDLE);
 
         }
+
+        /////////FLOWER ARM LOGIC/////////
+        boolean yPressed = gamepad1.y;
+
+        if(yPressed && !prevY){
+            flowerArmUp = !flowerArmUp;
+        }
+        if(flowerArmUp){
+            flowerArm.setPosition(FLOWER_ARM_UP);
+        }
+        else if(launcher.getLaunchState() != BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
+            flowerArm.setPosition(FLOWER_ARM_DOWN);
+            intake.setState(BerthaIntakeSMV2.MotorState.INTAKE);
+        }
+        //sets prevY to current Y to reset toggle
+        prevY=yPressed;
+
 
         intake.update();
         windmill.update();
