@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.Competition.Auto;
 import static com.pedropathing.api.Paths.curve;
 import static com.pedropathing.api.Paths.line;
 import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.waitMs;
 import static com.pedropathing.ivy.groups.Groups.parallel;
+import static com.pedropathing.ivy.groups.Groups.race;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 
@@ -37,12 +39,12 @@ public class BerthaTwoSide extends OpMode {
         private final Pose backOutofFlower1Pose = p.of(30, 45, 180);
         private final Pose CP1 = p.of(40, 72, 120);
         private final Pose oppositelaunchPose = p.of(34, 125, 120);
-        private final Pose flowerDropPose = p.of(50.4, 124.3, 125);
-        private final Pose CP4 = p.of(41, 117,90);
-        private final Pose readyIntakePose = p.of(33, 132, 180);
-        private final Pose finalIntakePose = p.of(12, 133, 180);
-        private final Pose parkPose = p.of(15, 99, 0);
-        private final Pose CP5 = p.of(46, 102, 0);
+        private final Pose CP2 = p.of(33, 103,90);
+        private final Pose preFlower2Pose = p.of(48, 120, 90);
+        private final Pose intakeFlower2Pose = p.of(48, 123, 90);
+        private final Pose backOutOfFlower2Pose = p.of(48, 115, 90);
+        private final Pose parkPose = p.of(8, 95, 0);
+        private final Pose CP3 = p.of(37, 14, 0);
 
     private Path toFlower1(){
         return line(startPose, preFlower1Pose).linear(startPose, preFlower1Pose)
@@ -68,26 +70,32 @@ public class BerthaTwoSide extends OpMode {
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
-    private Path toReadyIntake(){
-        return curve(flowerDropPose, CP4, readyIntakePose).linear(flowerDropPose, readyIntakePose)
+    private Path toFlower2(){
+        return curve(oppositelaunchPose, CP2, preFlower2Pose).linear(oppositelaunchPose, preFlower2Pose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
-    private Path toIntakeFlowerPollen(){
-        return line(readyIntakePose, finalIntakePose).constant(readyIntakePose)
+    private Path toIntakeFlower2(){
+        return line(preFlower2Pose, intakeFlower2Pose).constant(preFlower2Pose)
                 .with(
-                        Constants.foresightConfig.maxPathSpeed.at(0.5)
+                        Constants.foresightConfig.maxPathSpeed.at(0.45)
+                );
+    }
+    private Path toBackOutOfFlower2(){
+        return line(intakeFlower2Pose, backOutOfFlower2Pose).constant(intakeFlower2Pose)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
     private Path toThirdLaunch(){
-        return line(finalIntakePose, oppositelaunchPose).linear(finalIntakePose, oppositelaunchPose)
+        return line(backOutOfFlower2Pose, oppositelaunchPose).linear(backOutOfFlower2Pose, oppositelaunchPose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
     private Path toPark(){
-        return curve(oppositelaunchPose, CP5, parkPose).linear(oppositelaunchPose, parkPose)
+        return curve(oppositelaunchPose, CP3, parkPose).linear(oppositelaunchPose, parkPose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
@@ -100,8 +108,11 @@ public class BerthaTwoSide extends OpMode {
     }
     private Command intakeFlower1(){
         return parallel(
-                follow(follower, toIntakeFlower1()),
-                intake.intakeSeconds(4)
+                    race(
+                        follow(follower, toIntakeFlower1()),
+                        waitMs(3000)
+                        ),
+                    intake.intakeSeconds(3)
         );
     }
     private Command backOutOfFlower1(){
@@ -113,7 +124,34 @@ public class BerthaTwoSide extends OpMode {
     private Command goToOppositeSideandLaunch(){
         return sequential(
                 follow(follower, toOppositeSide()),
-                launcher.launchSeconds(2, 2460)
+                launcher.launchSeconds(3.5, 2470)
+        );
+    }
+    private Command goToFlower2(){
+        return parallel(
+                follow(follower, toFlower2()),
+                flowerArm.flowerArmDown()
+        );
+    }
+    private Command intakeFlower2(){
+        return parallel(
+                    race(
+                        follow(follower, toIntakeFlower2()),
+                        waitMs(3000)
+                        ),
+                    intake.intakeSeconds(3)
+        );
+    }
+    private Command backOutOfFlower2(){
+        return sequential(
+                follow(follower, toBackOutOfFlower2()),
+                flowerArm.flowerArmUp()
+        );
+    }
+    private Command thirdLaunch(){
+        return sequential(
+                follow(follower, toThirdLaunch()),
+                launcher.launchSeconds(3.5, 2470)
         );
     }
     private Command park(){
@@ -125,13 +163,16 @@ public class BerthaTwoSide extends OpMode {
 
     private Command autoRoutine(){
         return sequential(
-            launcher.launchSeconds(4, 2450),
+            launcher.launchSeconds(3.5, 2450),
             goToFlower1(),
             intakeFlower1(),
             backOutOfFlower1(),
-            goToOppositeSideandLaunch()
-
-
+            goToOppositeSideandLaunch(),
+            goToFlower2(),
+            intakeFlower2(),
+            backOutOfFlower2(),
+            thirdLaunch(),
+            park()
         );
     }
 
