@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.TeleOp.OpModeStorage;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
+import org.firstinspires.ftc.teamcode.pedro.Subsystems.FlowerArm;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Launcher;
 
@@ -28,15 +29,14 @@ public class BerthaTwoSide extends OpMode {
     private Follower follower;
     private Intake intake;
     private Launcher launcher;
+    private FlowerArm flowerArm;
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(55, 8, 270);
-        private final Pose CP1 = p.of(40, 18, 270);
-        private final Pose collectGardenPose = p.of(26, 10, 200);
-        private final Pose midGardenPose = p.of(15, 10, 200);
-        private final Pose endGardenPose = p.of(11, 10, 180);
-        private final Pose CP2 = p.of(36, 80, 180);
+        private final Pose preFlower1Pose = p.of(24, 45, 180);
+        private final Pose intakeFlower1Pose = p.of(15.9, 45, 180);
+        private final Pose backOutofFlower1Pose = p.of(30, 45, 180);
+        private final Pose CP1 = p.of(40, 72, 120);
         private final Pose oppositelaunchPose = p.of(34, 125, 120);
-        private final Pose CP3 = p.of(76, 113, 120);
         private final Pose flowerDropPose = p.of(50.4, 124.3, 125);
         private final Pose CP4 = p.of(41, 117,90);
         private final Pose readyIntakePose = p.of(33, 132, 180);
@@ -44,36 +44,28 @@ public class BerthaTwoSide extends OpMode {
         private final Pose parkPose = p.of(15, 99, 0);
         private final Pose CP5 = p.of(46, 102, 0);
 
-    private Path toGarden(){
-        return curve(startPose, CP1, collectGardenPose).linear(startPose, collectGardenPose)
+    private Path toFlower1(){
+        return line(startPose, preFlower1Pose).linear(startPose, preFlower1Pose)
                 .with(
                     Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
-
-    private Path garden(){
-        Path inGarden = line(collectGardenPose, midGardenPose).constant(midGardenPose)
-            .with(
-                Constants.foresightConfig.maxPathSpeed.at(0.33)
-            );
-
-        Path squareUp = line(midGardenPose, endGardenPose).linear(midGardenPose, endGardenPose)
+    private Path toIntakeFlower1(){
+        return line(preFlower1Pose, intakeFlower1Pose).constant(preFlower1Pose)
                 .with(
-                        Constants.foresightConfig.maxPathSpeed.at(0.4)
+                        Constants.foresightConfig.maxPathSpeed.at(0.45)
                 );
-
-        return Paths.path(inGarden, squareUp);
     }
-    private Path toOppositeSide(){
-        return curve(endGardenPose, CP2,oppositelaunchPose).linear(endGardenPose, oppositelaunchPose)
+    private Path toBackOutOfFlower1(){
+        return line(intakeFlower1Pose, backOutofFlower1Pose).constant(intakeFlower1Pose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
-    private Path toFlower(){
-        return curve(oppositelaunchPose, CP3, flowerDropPose).linear(oppositelaunchPose, flowerDropPose)
+    private Path toOppositeSide(){
+        return curve(backOutofFlower1Pose, CP1, oppositelaunchPose).linear(backOutofFlower1Pose, oppositelaunchPose)
                 .with(
-                        Constants.foresightConfig.maxPathSpeed.at(0.45)
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
     private Path toReadyIntake(){
@@ -100,44 +92,28 @@ public class BerthaTwoSide extends OpMode {
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
-    private Command goToGarden(){
-        return sequential(
-            follow(follower, toGarden())
+    private Command goToFlower1(){
+        return parallel(
+            follow(follower, toFlower1()),
+                flowerArm.flowerArmDown()
         );
     }
-    private Command gardenIntake(){
+    private Command intakeFlower1(){
         return parallel(
-                follow(follower, garden()),
+                follow(follower, toIntakeFlower1()),
                 intake.intakeSeconds(4)
+        );
+    }
+    private Command backOutOfFlower1(){
+        return sequential(
+                follow(follower, toBackOutOfFlower1()),
+                flowerArm.flowerArmUp()
         );
     }
     private Command goToOppositeSideandLaunch(){
         return sequential(
                 follow(follower, toOppositeSide()),
-                launcher.launchSeconds(4, 2480)
-        );
-    }
-    private Command dropFlowerPollen(){
-        return sequential(
-                follow(follower, toFlower()),
-                intake.intakeSeconds(2)
-        );
-    }
-    private Command readyIntake(){
-        return sequential(
-                follow(follower, toReadyIntake())
-        );
-    }
-    private Command intakeFlowerPollen(){
-        return parallel(
-                follow(follower, toIntakeFlowerPollen()),
-                intake.intakeSeconds(3)
-        );
-    }
-    private Command thirdLaunch(){
-        return sequential(
-                follow(follower, toThirdLaunch()),
-                launcher.launchSeconds(4, 2480)
+                launcher.launchSeconds(2, 2460)
         );
     }
     private Command park(){
@@ -150,14 +126,11 @@ public class BerthaTwoSide extends OpMode {
     private Command autoRoutine(){
         return sequential(
             launcher.launchSeconds(4, 2450),
-            goToGarden(),
-            gardenIntake(),
-            goToOppositeSideandLaunch(),
-            dropFlowerPollen(),
-            readyIntake(),
-            intakeFlowerPollen(),
-            thirdLaunch(),
-            park()
+            goToFlower1(),
+            intakeFlower1(),
+            backOutOfFlower1(),
+            goToOppositeSideandLaunch()
+
 
         );
     }
@@ -169,9 +142,13 @@ public class BerthaTwoSide extends OpMode {
         follower = Constants.create(hardwareMap);
         intake = new Intake(hardwareMap);
         launcher = new Launcher(hardwareMap);
+        flowerArm = new FlowerArm(hardwareMap);
+
 
         follower.setPose(startPose);
         follower.update();
+
+        flowerArm.initFlower();
     }
 
     @Override
