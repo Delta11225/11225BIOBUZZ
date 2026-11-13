@@ -13,8 +13,12 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.TeleOp.OpModeStorage;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
@@ -27,6 +31,11 @@ public class BerthaOneSideWAIT extends OpMode {
     private Follower follower;
     private Intake intake;
     private Launcher launcher;
+    private Limelight3A limelight;
+    public ElapsedTime autoTime = new ElapsedTime();
+    private boolean routineScheduled = false;
+    private int consecutiveTagFrames = 0;
+    private static final int REQUIRED_FRAMES = 3;
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(58, 136, 90);
         private final Pose CP1 = p.of(62.14, 126.29,90);
@@ -114,6 +123,30 @@ public class BerthaOneSideWAIT extends OpMode {
         );
     }
 
+    private boolean isTargetHiveCellId(int id) {
+        return id == 11 || id == 12 || id == 13 || id == 14; //CHANGE TO PROPER ID
+    }
+    private boolean isTargetTagConfirmed() {
+        LLResult result = limelight.getLatestResult();
+        boolean tagSeenThisFrame = false;
+
+        if (result != null && result.isValid()) {
+            for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
+                if (isTargetHiveCellId(tag.getFiducialId())) {
+                    tagSeenThisFrame = true;
+                    break;
+                }
+            }
+        }
+        if (tagSeenThisFrame) {
+            consecutiveTagFrames++;
+        } else {
+            consecutiveTagFrames = 0;
+        }
+
+        return consecutiveTagFrames >= REQUIRED_FRAMES;
+    }
+
     @Override
     public void init(){
         Scheduler.reset();
@@ -124,19 +157,35 @@ public class BerthaOneSideWAIT extends OpMode {
 
         follower.setPose(startPose);
         follower.update();
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0); // Set to AprilTag pipeline index
+        limelight.start();
+
+        routineScheduled = false;
+        consecutiveTagFrames = 0;
     }
 
     @Override
     public void start(){
-        schedule(
-            autoRoutine()
-        );
+        routineScheduled = false;
+        consecutiveTagFrames = 0;
     }
 
     @Override
     public void loop(){
         follower.update();
+
+        if (!routineScheduled && isTargetTagConfirmed()) {
+            schedule(autoRoutine());
+            routineScheduled = true;
+        } //NEED TO ADD AN EMERGENCY PARK USING ELASPED TIME AND AN ELSE STATEMENT
+
         Scheduler.execute();
+
+        telemetry.addData("Routine Triggered", routineScheduled);
+        telemetry.addData("Consecutive Tag Frames", consecutiveTagFrames);
+        telemetry.addData("Robot Pose", follower.pose());
+        telemetry.update();
     }
 
     @Override
@@ -147,6 +196,10 @@ public class BerthaOneSideWAIT extends OpMode {
 
         //Indicate that a valid Auto position was saved
         OpModeStorage.autoPoseSaved = true;
+
+        if (limelight != null) {
+            limelight.stop();
+        }
 
     }
 }
