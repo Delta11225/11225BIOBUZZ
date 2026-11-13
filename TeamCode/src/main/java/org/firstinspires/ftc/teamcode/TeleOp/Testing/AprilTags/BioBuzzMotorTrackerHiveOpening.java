@@ -167,6 +167,8 @@ public class BioBuzzMotorTrackerHiveOpening extends OpMode {
                     // The farther the HIVE opening is from the center,
                     // the stronger the motor response.
                     motorPower = kP * openingBearing;
+                    // "opening bearing"  is the horizontal angle (bearing) from the crosshair to the HIVE opening center in degrees (+ = left). This like "tx" from Ms. pacman.
+                    //Standard Limelight tx convention (+ = right) vs python script (+ = left)
 
                     // Make sure the motor receives enough power to move.
                     if (Math.abs(motorPower) < minPower) {

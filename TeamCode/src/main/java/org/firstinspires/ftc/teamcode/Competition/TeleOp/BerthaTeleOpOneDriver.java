@@ -1,7 +1,5 @@
-package org.firstinspires.ftc.teamcode.TeleOp;
+package org.firstinspires.ftc.teamcode.Competition.TeleOp;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,18 +8,18 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.TeleOp.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaIntakeSMV2;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaLauncherSMPIDF;
 import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaWindmillSM;
 
 @TeleOp
-public class BerthaTeleOpWithLimelight extends OpMode {
+public class BerthaTeleOpOneDriver extends OpMode {
 
     public DcMotor rearLeft = null;
     public DcMotor rearRight = null;
     public DcMotor frontLeft = null;
     public DcMotor frontRight = null;
-    private Limelight3A limelight;
 
     private final BerthaIntakeSMV2 intake = new BerthaIntakeSMV2();
     private final BerthaWindmillSM windmill = new BerthaWindmillSM();
@@ -50,16 +48,6 @@ public class BerthaTeleOpWithLimelight extends OpMode {
     double currentAngle;
 
     double baselauncherRPM = 0;
-    private static final double CAMERA_PITCH_DEG = 35;
-    private static final int CLUSTER_PIPELINE = 3;
-    private static final int CLUSTER_ID = 0;
-    private static final int NUM_TAGS = 1;
-    private static final int RANGE = 2;
-    private static final int BEARING = 3;
-    private static final int HEIGHT = 4;
-    private static final int ELEVATION = 5;
-    private static final int STICKER_PITCH = 6;
-    private static final int ROLL = 7;
 
     @Override
     public void init() {
@@ -106,16 +94,12 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         //odo.recalibrateIMU();
         odo.resetPosAndIMU();
 
-        limelight = hardwareMap.get(Limelight3A.class, "Limelight");
-
-        limelight.pipelineSwitch(CLUSTER_PIPELINE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData("X offset", odo.getXOffset(DistanceUnit.MM));
         telemetry.addData("Y offset", odo.getYOffset(DistanceUnit.MM));
         telemetry.addData("Device Version Number:", odo.getDeviceVersion());
         telemetry.addData("Heading Scalar", odo.getYawScalar());
-        telemetry.addLine("Limelight found");
         telemetry.update();
 
         //robot = new HardwareITD(hardwareMap);
@@ -154,19 +138,6 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
     @Override
     public void start() {
-        boolean switched = limelight.pipelineSwitch(CLUSTER_PIPELINE);
-
-        telemetry.addData("Pipeline switch accepted", switched);
-        telemetry.addData("Expected pipeline slot", CLUSTER_PIPELINE);
-        telemetry.update();
-
-        limelight.updatePythonInputs(new double[] {
-                0.0, CAMERA_PITCH_DEG,
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-        });
-
-        limelight.start();
-
         currentAngle = 0;
         runtime.reset();
         odo.resetPosAndIMU();
@@ -183,12 +154,17 @@ public class BerthaTeleOpWithLimelight extends OpMode {
         currentAngle =pos.getHeading(AngleUnit.DEGREES);
         move();
         peripheral();
+
+
     }
 
     /////////////////////////move sequence//////////////////////////
     public void move() {
 
         double theta = Math.toRadians(currentAngle);
+
+        telemetry.addData("CurrentAngle", currentAngle);
+        telemetry.addData("Theta", theta);
 
         //Orientation set for robot facing away from driver
         forward = -gamepad1.left_stick_y; //left joystick up
@@ -215,10 +191,10 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
         //add speed control here
 
-        if (gamepad1.left_bumper) {
+        if (gamepad1.cross) {
             powerMultiplier = .8;//FAST MODE
-        } else if (gamepad1.right_bumper) {
-            powerMultiplier = .5; //SLOW MODE
+        } else if (gamepad1.circle) {
+            powerMultiplier = .4; //SLOW MODE
         } else {
             powerMultiplier = 1; //NORMAL MODE
         }
@@ -226,21 +202,25 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
     }/////end of move////////
     public void peripheral() {
-        boolean launcherRPM = gamepad2.x;
-        boolean launcherOff = gamepad2.a;
+        boolean launcherRPM = gamepad1.x;
+        boolean launcherOff = gamepad1.b;
 
-        if(gamepad2.right_bumper) {
+        if(gamepad1.right_bumper) {
             intake.setState(BerthaIntakeSMV2.MotorState.INTAKE);
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
+            windmill.setState(BerthaWindmillSM.windmillState.IDLE);
         }
-        else if(gamepad2.left_bumper){
+        else if(gamepad1.left_bumper){
             intake.setState(BerthaIntakeSMV2.MotorState.OUTTAKE);
+            launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
+            windmill.setState(BerthaWindmillSM.windmillState.IDLE);
         }
         else{
             intake.setState(BerthaIntakeSMV2.MotorState.IDLE);
         }
 
         if(launcherRPM){
-            baselauncherRPM = 2500;
+            baselauncherRPM = 2450;
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.REVVING_UP);
 
         }
@@ -248,10 +228,10 @@ public class BerthaTeleOpWithLimelight extends OpMode {
             launcher.setLauncherState(BerthaLauncherSMPIDF.LauncherState.IDLE);
         }
 
-        if(gamepad2.dpad_up && launcher.getLaunchState()==BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
+        if(gamepad1.right_trigger_pressed && launcher.getLaunchState() == BerthaLauncherSMPIDF.LauncherState.READY_TO_LAUNCH){
             windmill.setState(BerthaWindmillSM.windmillState.FORWARD);
         }
-        else if (gamepad2.dpad_down){
+        else if (gamepad1.dpad_down){
             windmill.setState(BerthaWindmillSM.windmillState.BACKWARDS);
         }
         else{
@@ -261,7 +241,7 @@ public class BerthaTeleOpWithLimelight extends OpMode {
 
         intake.update();
         windmill.update();
-        launcher.update(2500);
+        launcher.update(baselauncherRPM);
     }/////end of peripheral move////////
 
     public void stop(){

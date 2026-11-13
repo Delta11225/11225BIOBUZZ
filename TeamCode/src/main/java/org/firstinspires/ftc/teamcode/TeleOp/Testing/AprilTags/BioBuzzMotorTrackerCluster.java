@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.Range;
 
 
 @TeleOp(name = "BIOBUZZ Motor Tracker", group = "Vision")
-public class BioBuzzMotorTracker extends OpMode {
+public class BioBuzzMotorTrackerCluster extends OpMode {
 
     //Hardware
     private Limelight3A limelight;
