@@ -32,6 +32,8 @@ public class BerthaAudienceTwoSideBLUE extends OpMode {
     private Intake intake;
     private Launcher launcher;
     private FlowerArm flowerArm;
+
+    ////////////////////////POSES////////////////////////
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(55, 8, 270);
         private final Pose preFlower1Pose = p.of(24, 45, 180);
@@ -48,6 +50,7 @@ public class BerthaAudienceTwoSideBLUE extends OpMode {
         private final Pose parkPose = p.of(8, 95, 0);
         private final Pose CP3 = p.of(37, 14, 0);
 
+    ////////////////////////PATHS////////////////////////
     private Path toFlower1(){
         return line(startPose, preFlower1Pose).linear(startPose, preFlower1Pose)
                 .with(
@@ -87,6 +90,8 @@ public class BerthaAudienceTwoSideBLUE extends OpMode {
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
+
+    ////////////////////////COMMANDS////////////////////////
     private Command goToFlower1(){
         return parallel(
             follow(follower, toFlower1()),
@@ -134,6 +139,8 @@ public class BerthaAudienceTwoSideBLUE extends OpMode {
             park()
         );
     }
+
+    ////////////////////////RUN METHODS////////////////////////
 
     @Override
     public void init(){

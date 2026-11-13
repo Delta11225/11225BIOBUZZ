@@ -28,18 +28,23 @@ public class BerthaAudienceOneTipBLUE extends OpMode {
     private Intake intake;
     private Launcher launcher;
     private FlowerArm flowerArm;
+
+    ////////////////////////POSES////////////////////////
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(55, 8, 270);
         private final Pose CP1 = p.of(16, 42, 0);
         private final Pose parkPose = p.of(8, 95, 0);
 
 
+    ////////////////////////PATHS////////////////////////
     private Path toPark(){
         return curve(startPose, CP1, parkPose).linear(startPose, parkPose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
+
+    ////////////////////////COMMANDS////////////////////////
     private Command park(){
         return sequential(
             follow(follower, toPark())
@@ -53,6 +58,7 @@ public class BerthaAudienceOneTipBLUE extends OpMode {
         );
     }
 
+    ////////////////////////RUN METHODS////////////////////////
     @Override
     public void init(){
         Scheduler.reset();

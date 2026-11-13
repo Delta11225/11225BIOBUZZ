@@ -3,25 +3,26 @@ package org.firstinspires.ftc.teamcode.Competition.Auto;
 import static com.pedropathing.api.Paths.curve;
 import static com.pedropathing.api.Paths.line;
 import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.waitMs;
+import static com.pedropathing.ivy.commands.Commands.waitUntil;
 import static com.pedropathing.ivy.groups.Groups.parallel;
+import static com.pedropathing.ivy.groups.Groups.race;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 
+import com.pedropathing.api.Paths;
 import com.pedropathing.api.PoseFactory;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.TeleOp.OpModeStorage;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
+import org.firstinspires.ftc.teamcode.pedro.Subsystems.FlowerArm;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Launcher;
 
@@ -31,121 +32,116 @@ public class BerthaOneSideWAIT extends OpMode {
     private Follower follower;
     private Intake intake;
     private Launcher launcher;
-    private Limelight3A limelight;
-    public ElapsedTime autoTime = new ElapsedTime();
-    private boolean routineScheduled = false;
-    private int consecutiveTagFrames = 0;
-    private static final int REQUIRED_FRAMES = 3;
+    private FlowerArm flowerArm;
+
+    ////////////////////////POSES////////////////////////
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(58, 136, 90);
-        private final Pose CP1 = p.of(62.14, 126.29,90);
-        private final Pose flowerDropPose = p.of(47.5, 132, 125);
-        private final Pose CP2 = p.of(50.83, 115.74,90);
-        private final Pose readyIntakePose = p.of(33, 135, 180);
-        private final Pose finalIntakePose = p.of(9.4, 137.5, 180);
+        private final Pose giveSpacePose = p.of(58, 124, 90);
+        private final Pose CP1 = p.of(58, 116,90);
+        private final Pose preFlowerPose = p.of(47, 118, 90);
+        private final Pose intakeFlowerPose = p.of(47, 127, 90);
+        private final Pose backOutOfFlowerPose = p.of(47, 117, 90);
+        private final Pose jiggleFlowerPose = p.of(47, 121, 90);
         private final Pose angledLaunchPose = p.of(34, 125, 125);
-        private final Pose parkPose = p.of(15, 99, 0);
-        private final Pose CP3 = p.of(46, 102, 0);
+        private final Pose CP2 = p.of(37, 14, 0);
+        private final Pose parkPose = p.of(8, 95, 0);
 
-
-
+    ////////////////////////PATHS////////////////////////
     private Path toFlower(){
-        return curve(startPose, CP1, flowerDropPose).linear(startPose, flowerDropPose)
+        Path toGiveSpace = Paths.line(startPose, giveSpacePose).constant(startPose);
+        Path toPreFlower = Paths.curve(giveSpacePose, CP1, preFlowerPose).constant(giveSpacePose);
+        return Paths.path(toGiveSpace, toPreFlower)
                 .with(
-                    Constants.foresightConfig.maxPathSpeed.at(0.4)
+                    Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
-    private Path toReadyIntake(){
-        return curve(flowerDropPose, CP2, readyIntakePose).linear(flowerDropPose, readyIntakePose)
+    private Path toIntakeFlower(){
+        return line(preFlowerPose, intakeFlowerPose).constant(preFlowerPose)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(0.45)
+                );
+    }
+    private Path toBackOutOfFlower(){
+        return line(intakeFlowerPose, backOutOfFlowerPose).constant(intakeFlowerPose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
-    private Path toIntakeFlowerPollen(){
-        return line(readyIntakePose, finalIntakePose).constant(readyIntakePose)
+    private Path jiggleFlower(){
+        Path jiggleForward1 = Paths.line(backOutOfFlowerPose, jiggleFlowerPose).constant(backOutOfFlowerPose);
+        Path jiggleBackward1 = Paths.line(jiggleFlowerPose, backOutOfFlowerPose).constant(backOutOfFlowerPose);
+        return Paths.path(jiggleForward1, jiggleBackward1)
                 .with(
-                        Constants.foresightConfig.maxPathSpeed.at(0.5)
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
     private Path toSecondLaunch(){
-        return line(finalIntakePose, angledLaunchPose).linear(finalIntakePose, angledLaunchPose)
+        return line(backOutOfFlowerPose, angledLaunchPose).linear(backOutOfFlowerPose, angledLaunchPose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
     private Path toPark(){
-        return curve(angledLaunchPose, CP3, parkPose).linear(angledLaunchPose, parkPose)
+        return curve(angledLaunchPose, CP2, parkPose).linear(angledLaunchPose, parkPose)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
 
-    private Command dropFlowerPollen(){
-        return sequential(
+    ////////////////////////COMMANDS////////////////////////
+    private Command goToFlower(){
+        return parallel(
             follow(follower, toFlower()),
+            sequential(
+                waitUntil(()-> follower.pathIndex() >= 1),
+                flowerArm.flowerArmDown()
+            )
+        );
+    }
+    private Command intakeFlower(){
+        return parallel(
+            race(
+                follow(follower, toIntakeFlower()),
+                waitMs(2000)
+            ),
             intake.intakeSeconds(2)
         );
     }
-    private Command readyIntake(){
+    private Command backOutOfFlower(){
         return sequential(
-                follow(follower, toReadyIntake())
-        );
-    }
-    private Command intakeFlowerPollen(){
-        return parallel(
-                follow(follower, toIntakeFlowerPollen()),
-                intake.intakeSeconds(3)
+            follow(follower, toBackOutOfFlower()),
+            parallel(
+                follow(follower, jiggleFlower()),
+                intake.intakeSeconds(2)
+            ),
+            flowerArm.flowerArmUp()
         );
     }
     private Command secondLaunch(){
         return sequential(
-                follow(follower, toSecondLaunch()),
-                launcher.launchSeconds(4, 2480)
+            follow(follower, toSecondLaunch()),
+            launcher.launchSeconds(3, 2470)
         );
     }
     private Command park(){
         return sequential(
-                follow(follower, toPark())
+            follow(follower, toPark())
         );
     }
-
 
     private Command autoRoutine(){
         return sequential(
-            launcher.launchSeconds(4, 2450),
-            dropFlowerPollen(),
-            readyIntake(),
-            intakeFlowerPollen(),
+            waitMs(15000),
+            launcher.launchSeconds(3, 2450),
+            goToFlower(),
+            intakeFlower(),
+            backOutOfFlower(),
             secondLaunch(),
             park()
-
-
         );
     }
 
-    private boolean isTargetHiveCellId(int id) {
-        return id == 11 || id == 12 || id == 13 || id == 14; //CHANGE TO PROPER ID
-    }
-    private boolean isTargetTagConfirmed() {
-        LLResult result = limelight.getLatestResult();
-        boolean tagSeenThisFrame = false;
-
-        if (result != null && result.isValid()) {
-            for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
-                if (isTargetHiveCellId(tag.getFiducialId())) {
-                    tagSeenThisFrame = true;
-                    break;
-                }
-            }
-        }
-        if (tagSeenThisFrame) {
-            consecutiveTagFrames++;
-        } else {
-            consecutiveTagFrames = 0;
-        }
-
-        return consecutiveTagFrames >= REQUIRED_FRAMES;
-    }
 
     @Override
     public void init(){
@@ -154,38 +150,24 @@ public class BerthaOneSideWAIT extends OpMode {
         follower = Constants.create(hardwareMap);
         intake = new Intake(hardwareMap);
         launcher = new Launcher(hardwareMap);
+        flowerArm = new FlowerArm(hardwareMap);
 
         follower.setPose(startPose);
         follower.update();
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(0); // Set to AprilTag pipeline index
-        limelight.start();
 
-        routineScheduled = false;
-        consecutiveTagFrames = 0;
     }
 
     @Override
     public void start(){
-        routineScheduled = false;
-        consecutiveTagFrames = 0;
+        schedule(
+            autoRoutine()
+        );
     }
 
     @Override
-    public void loop(){
+    public void loop() {
         follower.update();
-
-        if (!routineScheduled && isTargetTagConfirmed()) {
-            schedule(autoRoutine());
-            routineScheduled = true;
-        } //NEED TO ADD AN EMERGENCY PARK USING ELASPED TIME AND AN ELSE STATEMENT
-
         Scheduler.execute();
-
-        telemetry.addData("Routine Triggered", routineScheduled);
-        telemetry.addData("Consecutive Tag Frames", consecutiveTagFrames);
-        telemetry.addData("Robot Pose", follower.pose());
-        telemetry.update();
     }
 
     @Override
@@ -196,10 +178,6 @@ public class BerthaOneSideWAIT extends OpMode {
 
         //Indicate that a valid Auto position was saved
         OpModeStorage.autoPoseSaved = true;
-
-        if (limelight != null) {
-            limelight.stop();
-        }
 
     }
 }

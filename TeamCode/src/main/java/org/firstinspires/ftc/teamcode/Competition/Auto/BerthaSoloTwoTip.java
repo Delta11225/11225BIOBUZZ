@@ -4,6 +4,7 @@ import static com.pedropathing.api.Paths.curve;
 import static com.pedropathing.api.Paths.line;
 import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.commands.Commands.waitMs;
+import static com.pedropathing.ivy.commands.Commands.waitUntil;
 import static com.pedropathing.ivy.groups.Groups.parallel;
 import static com.pedropathing.ivy.groups.Groups.race;
 import static com.pedropathing.ivy.groups.Groups.sequential;
@@ -32,8 +33,11 @@ public class BerthaSoloTwoTip extends OpMode {
     private Intake intake;
     private Launcher launcher;
     private FlowerArm flowerArm;
+
+    ////////////////////////POSES////////////////////////
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(55, 8, 270);
+        private final Pose giveSpacePose = p.of(55, 15, 270);
         private final Pose preFlower1Pose = p.of(24, 45, 180);
         private final Pose intakeFlower1Pose = p.of(15.9, 45, 180);
         private final Pose backOutofFlower1Pose = p.of(30, 45, 180);
@@ -48,8 +52,11 @@ public class BerthaSoloTwoTip extends OpMode {
         private final Pose parkPose = p.of(8, 95, 0);
         private final Pose CP3 = p.of(37, 14, 0);
 
+    ////////////////////////PATHS////////////////////////
     private Path toFlower1(){
-        return line(startPose, preFlower1Pose).linear(startPose, preFlower1Pose)
+        Path toGiveSpace = Paths.line(startPose, giveSpacePose).constant(startPose);
+        Path toPreFLower1 = Paths.line(giveSpacePose, preFlower1Pose).linear(giveSpacePose, preFlower1Pose);
+        return Paths.path(toGiveSpace, toPreFLower1)
                 .with(
                     Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
@@ -119,19 +126,24 @@ public class BerthaSoloTwoTip extends OpMode {
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
+
+    ////////////////////////COMMANDS////////////////////////
     private Command goToFlower1(){
         return parallel(
             follow(follower, toFlower1()),
-            flowerArm.flowerArmDown()
+            sequential(
+                waitUntil(()-> follower.pathIndex() >= 1),
+                flowerArm.flowerArmDown()
+            )
         );
     }
     private Command intakeFlower1(){
         return parallel(
             race(
                 follow(follower, toIntakeFlower1()),
-                waitMs(3000)
+                waitMs(2000)
             ),
-            intake.intakeSeconds(1.75)
+            intake.intakeSeconds(2)
         );
     }
     private Command backOutOfFlower1(){
@@ -160,9 +172,9 @@ public class BerthaSoloTwoTip extends OpMode {
         return parallel(
             race(
                 follow(follower, toIntakeFlower2()),
-                waitMs(3000)
+                waitMs(2000)
             ),
-            intake.intakeSeconds(1.75)
+            intake.intakeSeconds(2)
         );
     }
     private Command backOutOfFlower2(){
@@ -203,6 +215,7 @@ public class BerthaSoloTwoTip extends OpMode {
         );
     }
 
+    ////////////////////////RUN METHODS////////////////////////
     @Override
     public void init(){
         Scheduler.reset();
