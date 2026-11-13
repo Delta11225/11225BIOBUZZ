@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Testing;
 
+import com.pedropathing.api.Paths;
+import com.pedropathing.api.PoseFactory;
 import com.pedropathing.drivetrain.DrivePowers;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.ManualDrive;
@@ -9,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.TeleOp.OpModeStorage;
+import org.firstinspires.ftc.teamcode.TeleOp.StateMachines.BerthaLauncherSMPIDF;
 import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 
@@ -34,13 +37,25 @@ public class BerthaTeleOpPedroDrive extends OpMode {
     // This variable scales the joystick power.
     // A value of 1.0 means full power.
     private double powerMultiplier = 1.0;
+    private final PoseFactory p = PoseFactory.degrees();
+        private final Pose Launch_Spot_A = p.of(55, 8, 270);
+        private final Pose Launch_Spot_B = p.of(55, 8, 270);
+        private final Pose Launch_Spot_C = p.of(55, 8, 270);
+        private final Pose Launch_Spot_D = p.of(55, 8, 270);
+    private static final double Stick_cancel = 0.3; //for cancelling the autodrive
+    private boolean autoDriving = false;
+    private boolean prevA = false;
 
-
+    private static final double SAFE_MIN_X = 20;
+    private static final double SAFE_MAX_X = 124;
+    private static final double SAFE_MIN_Y = 0;
+    private static final double SAFE_MAX_Y = 40;
     @Override
     public void init() {
 
     //init Pedro, drivetrain, and pinpoint through pedropathing
         follower = Constants.create(hardwareMap);
+
 
         telemetry.addLine("Pedro initialized");
         telemetry.addLine("Press INIT, then PLAY to begin.");
@@ -69,45 +84,66 @@ public class BerthaTeleOpPedroDrive extends OpMode {
     @Override
     public void loop() {
 
+        follower.update();
+
+        boolean aPressed = gamepad1.a &&! prevA;
+        prevA = gamepad1.a;
+
+        boolean sticksMoved = Math.abs(gamepad1.left_stick_x)>Stick_cancel || Math.abs(gamepad1.right_stick_x)>Stick_cancel||Math.abs(gamepad1.left_stick_y)>Stick_cancel;
+
+        if (aPressed){
+            Pose here = follower.pose();
+            follower.follow(Paths.line(here, Launch_Spot_A).linear(here,Launch_Spot_A));
+            autoDriving = true;
+        }
+        // 2. Cancel auto-drive if sticks move OR if the path finishes
+        if (autoDriving && (sticksMoved || !follower.isBusy())) {
+            autoDriving = false;
+        }
+
+        if(autoDriving&&sticksMoved){
+            autoDriving=false;
+        }
         //Handling Power Multipliers - Speed Modes
-        if (gamepad1.left_bumper) {//fast mode
-            powerMultiplier = 1.0;
+        if(!autoDriving) {
+            if (gamepad1.left_bumper) {//fast mode
+                powerMultiplier = 1.0;
+            } else if (gamepad1.right_bumper) {//slow mode
+                powerMultiplier = 0.4;
+            } else {
+                powerMultiplier = 0.8;//normal  q
+            }
+
+            //Getting joystick readings (Gamepad 1)
+            double forward = -gamepad1.left_stick_y;
+            double lateral = -gamepad1.left_stick_x * 1.1; //1.1 multiplier on lateral movement for strafe adjustment
+            double turn = -gamepad1.right_stick_x;
+
+
+            //Applying speed multipliers
+            forward *= powerMultiplier;
+            lateral *= powerMultiplier;
+            turn *= powerMultiplier;
+
+
+
+            // Utilize Pedro's ManualDrive.fieldCentric()
+            // ManualDrive.fieldCentric() uses the robot's current heading to convert our joystick commands into the correct drivetrain commands.
+            // follower.pose().heading() gives Pedro's current heading, which comes from the Pinpoint localization system.
+
+            DrivePowers powers = ManualDrive.fieldCentric(
+                    forward,
+                    lateral,
+                    turn,
+                    follower.pose().heading()
+            );
+
+
+            // Send Drive Commands to Pedro. Pedro calculates the appropriate drivetrain output
+            // This tells Pedro what we want the robot to do.It does not directly set individual motor powers.
+            follower.manual(powers);
+
         }
-        else if (gamepad1.right_bumper) {//slow mode
-            powerMultiplier = 0.4;
-        }
-        else {
-            powerMultiplier = 0.8;//normal
-        }
-
-        //Getting joystick readings (Gamepad 1)
-        double forward = -gamepad1.left_stick_y;
-        double lateral = gamepad1.left_stick_x * 1.1; //1.1 multiplier on lateral movement for strafe adjustment
-        double turn = gamepad1.right_stick_x;
-
-
-        //Applying speed multipliers
-        forward *= powerMultiplier;
-        lateral *= powerMultiplier;
-        turn *= powerMultiplier;
-
-
-
-        // Utilize Pedro's ManualDrive.fieldCentric()
-        // ManualDrive.fieldCentric() uses the robot's current heading to convert our joystick commands into the correct drivetrain commands.
-        // follower.pose().heading() gives Pedro's current heading, which comes from the Pinpoint localization system.
-
-        DrivePowers powers = ManualDrive.fieldCentric(
-                forward,
-                lateral,
-                turn,
-                follower.pose().heading()
-        );
-
-
-        // Send Drive Commands to Pedro. Pedro calculates the appropriate drivetrain output
-        // This tells Pedro what we want the robot to do.It does not directly set individual motor powers.
-        follower.manual(powers);
 
 
         // UPDATE PEDRO: Each loop, update() allows Pedro to:
@@ -116,7 +152,7 @@ public class BerthaTeleOpPedroDrive extends OpMode {
         // 3. Update its heading
         // 4. Update drivetrain control
 
-        follower.update();
+
 
 
         //Read Robot's current Pose (x, y, heading)
