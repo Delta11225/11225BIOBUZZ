@@ -14,10 +14,11 @@ public class Launcher {
     private final CRServo windmill;
     private final DcMotor intake;
     public ElapsedTime launchTime = new ElapsedTime();
+
     public final double TICKS_PER_MOTOR_REV = 28;
     public double RPMTolerance = 200;
-    public double F = 12.5;
-    public double P = 40;
+    public double F = 12.1;
+    public double P = 150;
 
     public Launcher(HardwareMap hardwareMap){
         PIDFCoefficients PIDF = new PIDFCoefficients(

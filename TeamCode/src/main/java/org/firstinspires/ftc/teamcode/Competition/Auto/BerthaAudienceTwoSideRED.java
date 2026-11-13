@@ -36,26 +36,24 @@ public class BerthaAudienceTwoSideRED extends OpMode {
     ////////////////////////POSES////////////////////////
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(55, 8, 270);
+        private final Pose giveSpacePose = p.of(55, 15, 270);
         private final Pose preFlower1Pose = p.of(24, 45, 180);
         private final Pose intakeFlower1Pose = p.of(15.9, 45, 180);
         private final Pose backOutofFlower1Pose = p.of(30, 45, 180);
         private final Pose jiggleFlower1Pose = p.of(26, 45, 180);
         private final Pose CP1 = p.of(40, 72, 120);
         private final Pose oppositelaunchPose = p.of(34, 125, 120);
-        private final Pose CP2 = p.of(33, 103,90);
-        private final Pose preFlower2Pose = p.of(48, 120, 90);
-        private final Pose intakeFlower2Pose = p.of(48, 123, 90);
-        private final Pose backOutOfFlower2Pose = p.of(48, 115, 90);
-        private final Pose jiggleFlower2Pose = p.of(48, 119, 90);
-        private final Pose parkPose = p.of(8, 95, 0);
+        private final Pose parkPose = p.of(15, 90, 0);
         private final Pose CP3 = p.of(37, 14, 0);
 
     ////////////////////////PATHS////////////////////////
 
     private Path toFlower1(){
-        return line(startPose, preFlower1Pose).linear(startPose, preFlower1Pose)
+        Path toGiveSpace = Paths.line(startPose, giveSpacePose).constant(startPose);
+        Path toPreFLower1 = Paths.line(giveSpacePose, preFlower1Pose).linear(giveSpacePose, preFlower1Pose);
+        return Paths.path(toGiveSpace, toPreFLower1)
                 .with(
-                    Constants.foresightConfig.maxPathSpeed.at(1.0)
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
     }
     private Path toIntakeFlower1(){
@@ -113,7 +111,7 @@ public class BerthaAudienceTwoSideRED extends OpMode {
             follow(follower, toBackOutOfFlower1()),
                 parallel(
                     follow(follower, jiggleFlower1()),
-                    intake.intakeSeconds(2)
+                    intake.intakeSeconds(1)
                 ),
             flowerArm.flowerArmUp()
         );

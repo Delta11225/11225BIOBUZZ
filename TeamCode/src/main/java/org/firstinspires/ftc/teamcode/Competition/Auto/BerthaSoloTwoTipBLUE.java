@@ -27,8 +27,8 @@ import org.firstinspires.ftc.teamcode.pedro.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.pedro.Subsystems.Launcher;
 
 
-@Autonomous(preselectTeleOp = "BerthaTeleOpOneDriver")
-public class BerthaSoloTwoTip extends OpMode {
+@Autonomous(preselectTeleOp = "BerthaTeleOpOneDriver_LL_BLUE")
+public class BerthaSoloTwoTipBLUE extends OpMode {
     private Follower follower;
     private Intake intake;
     private Launcher launcher;
@@ -37,6 +37,8 @@ public class BerthaSoloTwoTip extends OpMode {
     ////////////////////////POSES////////////////////////
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(55, 8, 270);
+        private final Pose firstLaunchJiggleForwardPose = p.of(55, 10, 270);
+        private final Pose firstLaunchJiggleBackwardPose = p.of(55, 9, 270);
         private final Pose giveSpacePose = p.of(55, 15, 270);
         private final Pose preFlower1Pose = p.of(24, 45, 180);
         private final Pose intakeFlower1Pose = p.of(15.9, 45, 180);
@@ -44,15 +46,25 @@ public class BerthaSoloTwoTip extends OpMode {
         private final Pose jiggleFlower1Pose = p.of(26, 45, 180);
         private final Pose CP1 = p.of(40, 72, 120);
         private final Pose oppositelaunchPose = p.of(34, 125, 120);
+        private final Pose jiggleOppositelaunchPose = p.of(35, 124, 120);
         private final Pose CP2 = p.of(33, 103,90);
         private final Pose preFlower2Pose = p.of(48, 120, 90);
         private final Pose intakeFlower2Pose = p.of(48, 123, 90);
         private final Pose backOutOfFlower2Pose = p.of(48, 115, 90);
         private final Pose jiggleFlower2Pose = p.of(48, 119, 90);
-        private final Pose parkPose = p.of(8, 95, 0);
+        private final Pose parkPose = p.of(15, 90, 0);
         private final Pose CP3 = p.of(37, 14, 0);
 
     ////////////////////////PATHS////////////////////////
+
+    private Path jiggleFirstLaunch(){
+        Path jiggleLaunchForward1 = Paths.line(startPose, firstLaunchJiggleForwardPose).constant(startPose);
+        Path jiggleLaunchBackward1 = Paths.line(firstLaunchJiggleForwardPose, firstLaunchJiggleBackwardPose).constant(startPose);
+        return Paths.path(jiggleLaunchForward1, jiggleLaunchBackward1)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
+                );
+    }
     private Path toFlower1(){
         Path toGiveSpace = Paths.line(startPose, giveSpacePose).constant(startPose);
         Path toPreFLower1 = Paths.line(giveSpacePose, preFlower1Pose).linear(giveSpacePose, preFlower1Pose);
@@ -84,6 +96,14 @@ public class BerthaSoloTwoTip extends OpMode {
 
     private Path toOppositeSide(){
         return curve(backOutofFlower1Pose, CP1, oppositelaunchPose).linear(backOutofFlower1Pose, oppositelaunchPose)
+                .with(
+                        Constants.foresightConfig.maxPathSpeed.at(1.0)
+                );
+    }
+    private Path jiggleLaunchOppositeSide(){
+        Path jiggleLaunchForward2 = Paths.line(oppositelaunchPose, jiggleOppositelaunchPose).constant(oppositelaunchPose);
+        Path jiggleLaunchBackward2 = Paths.line(jiggleOppositelaunchPose, oppositelaunchPose).constant(oppositelaunchPose);
+        return Paths.path(jiggleLaunchForward2, jiggleLaunchBackward2)
                 .with(
                         Constants.foresightConfig.maxPathSpeed.at(1.0)
                 );
@@ -128,6 +148,16 @@ public class BerthaSoloTwoTip extends OpMode {
     }
 
     ////////////////////////COMMANDS////////////////////////
+
+    private Command firstLaunch(){
+        return parallel(
+            launcher.launchSeconds(3, 2450),
+            sequential(
+                waitMs(2000),
+                follow(follower, jiggleFirstLaunch())
+            )
+        );
+    }
     private Command goToFlower1(){
         return parallel(
             follow(follower, toFlower1()),
@@ -151,7 +181,7 @@ public class BerthaSoloTwoTip extends OpMode {
             follow(follower, toBackOutOfFlower1()),
                 parallel(
                     follow(follower, jiggleFlower1()),
-                    intake.intakeSeconds(2)
+                    intake.intakeSeconds(1)
                 ),
             flowerArm.flowerArmUp()
         );
@@ -159,7 +189,13 @@ public class BerthaSoloTwoTip extends OpMode {
     private Command goToOppositeSideAndLaunch(){
         return sequential(
             follow(follower, toOppositeSide()),
-            launcher.launchSeconds(3, 2470)
+            parallel(
+                launcher.launchSeconds(3, 2470),
+                sequential(
+                    waitMs(2000),
+                    follow(follower, jiggleLaunchOppositeSide())
+                )
+            )
         );
     }
     private Command goToFlower2(){
@@ -182,7 +218,7 @@ public class BerthaSoloTwoTip extends OpMode {
             follow(follower, toBackOutOfFlower2()),
                 parallel(
                     follow(follower, jiggleFlower2()),
-                    intake.intakeSeconds(2)
+                    intake.intakeSeconds(1)
                 ),
             flowerArm.flowerArmUp()
         );
@@ -190,7 +226,13 @@ public class BerthaSoloTwoTip extends OpMode {
     private Command thirdLaunch(){
         return sequential(
             follow(follower, toThirdLaunch()),
-            launcher.launchSeconds(3, 2470)
+            parallel(
+                launcher.launchSeconds(3, 2470),
+                sequential(
+                    waitMs(2000),
+                    follow(follower, jiggleLaunchOppositeSide())
+                )
+            )
         );
     }
     private Command park(){
@@ -202,7 +244,7 @@ public class BerthaSoloTwoTip extends OpMode {
 
     private Command autoRoutine(){
         return sequential(
-            launcher.launchSeconds(3, 2450),
+            firstLaunch(),
             goToFlower1(),
             intakeFlower1(),
             backOutOfFlower1(),

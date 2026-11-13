@@ -32,7 +32,7 @@ public class BerthaAudienceOneTipRED extends OpMode {
     private final PoseFactory p = PoseFactory.degrees();
         private final Pose startPose = p.of(55, 8, 270);
         private final Pose CP1 = p.of(16, 42, 0);
-        private final Pose parkPose = p.of(8, 95, 0);
+        private final Pose parkPose = p.of(15, 90, 0);
 
 
     ////////////////////////PATHS////////////////////////
