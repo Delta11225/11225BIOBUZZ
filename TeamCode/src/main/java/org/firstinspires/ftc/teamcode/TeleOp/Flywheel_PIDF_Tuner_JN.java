@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 public class Flywheel_PIDF_Tuner_JN extends OpMode {
     public DcMotorEx flywheelMotor;
     static final double TICKS_PER_MOTOR_REV = 28;
-    public double highVelocity =2190;
+    public double highVelocity =2275;
     public double lowVelocity = 1500;
 
     double curTargetVelocity = highVelocity;
@@ -80,5 +80,6 @@ public class Flywheel_PIDF_Tuner_JN extends OpMode {
         telemetry.addData("Tuning P", "%.4f (D-Pad U/D)", P);
         telemetry.addData("Tuning F", "%.4f (D-Pad L/R)", F);
         telemetry.addData("Step Size", "%.4f (B Button)", stepSizes[stepIndex]);
+        telemetry.addLine("Switch Target RPM (Y Button)");
     }
 }
