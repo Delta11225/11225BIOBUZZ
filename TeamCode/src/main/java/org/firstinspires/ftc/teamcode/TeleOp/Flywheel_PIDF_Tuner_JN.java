@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 public class Flywheel_PIDF_Tuner_JN extends OpMode {
     public DcMotorEx flywheelMotor;
     static final double TICKS_PER_MOTOR_REV = 28;
-    public double highVelocity =2275;
+    public double highVelocity =2270;
     public double lowVelocity = 1500;
 
     double curTargetVelocity = highVelocity;
