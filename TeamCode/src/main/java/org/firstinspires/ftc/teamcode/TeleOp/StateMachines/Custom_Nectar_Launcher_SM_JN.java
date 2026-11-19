@@ -31,8 +31,8 @@ public class Custom_Nectar_Launcher_SM_JN {
     public static final double LAUNCH_TIME_MS = 2500;
     public static final double RPM_TOLERANCE = 60;
     public static final double NECTAR_TARGET_RPM = 2275;
-    public static final double GATE_CLOSED = 0.0;
-    public static final double GATE_OPEN = 0.455;
+    public static final double GATE_CLOSED = 0.455;
+    public static final double GATE_OPEN = 0.0;
 
     // - - - 4. State Variables - - -
     private LauncherState launcherState = LauncherState.IDLE;

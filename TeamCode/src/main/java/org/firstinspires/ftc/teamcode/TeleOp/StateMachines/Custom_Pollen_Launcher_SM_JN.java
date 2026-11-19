@@ -31,8 +31,8 @@ public class Custom_Pollen_Launcher_SM_JN {
     public static final double LAUNCH_TIME_MS = 2500;
     public static final double RPM_TOLERANCE = 60;
     public static final double POLLEN_TARGET_RPM = 2190;
-    public static final double GATE_CLOSED = 0.1;
-    public static final double GATE_OPEN = 0.5;
+    public static final double GATE_CLOSED = 0.5;
+    public static final double GATE_OPEN = 0.1;
 
     // - - - 4. State Variables - - -
     private LauncherState launcherState = LauncherState.IDLE;
