@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class Custom_Launcher_SM_JN {
+public class Custom_Nectar_Launcher_SM_JN {
     //- - - 1. define all possible states - - -
     public enum LauncherState {
         IDLE,
@@ -21,8 +21,8 @@ public class Custom_Launcher_SM_JN {
     private Servo gate = null;
     private final ElapsedTime launchTimer = new ElapsedTime();
 
-    public static final double F = 25.10;
-    public static final double P = 173.02;
+    public static final double F = 12.751;
+    public static final double P = 170;
     public static final double D = 0.03;
 
     // - - - 3. Constants - - -
@@ -30,9 +30,9 @@ public class Custom_Launcher_SM_JN {
     public static final double TICKS_PER_MOTOR_REV = 28;
     public static final double LAUNCH_TIME_MS = 2500;
     public static final double RPM_TOLERANCE = 60;
-    public static final double TARGET_RPM = 2190;
-    public static final double GATE_CLOSED = 0.1;
-    public static final double GATE_OPEN = 0.5;
+    public static final double NECTAR_TARGET_RPM = 2275;
+    public static final double GATE_CLOSED = 0.0;
+    public static final double GATE_OPEN = 0.455;
 
     // - - - 4. State Variables - - -
     private LauncherState launcherState = LauncherState.IDLE;

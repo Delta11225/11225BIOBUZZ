@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class Custom_Launcher_TeleOp extends OpMode {
-    private final Custom_Launcher_SM_JN launcher = new Custom_Launcher_SM_JN();
+public class Custom_Pollen_Launcher_TeleOp extends OpMode {
+    private final Custom_Pollen_Launcher_SM_JN launcher = new Custom_Pollen_Launcher_SM_JN();
 
     @Override
     public void init() {
@@ -21,7 +21,7 @@ public class Custom_Launcher_TeleOp extends OpMode {
             launcher.launchPressed();
         }
 
-        launcher.update(Custom_Launcher_SM_JN.TARGET_RPM);
+        launcher.update(Custom_Pollen_Launcher_SM_JN.POLLEN_TARGET_RPM);
 
         telemetry.addData("State", launcher.getLaunchState());
         telemetry.addData("RPM", launcher.getRPM());
